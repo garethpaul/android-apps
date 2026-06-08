@@ -49,12 +49,15 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `gradle test` or Android Studio's test runner when the SDK is configured
+- Run `scripts/check-baseline.sh` from the repository root for SDK-free source checks.
+- From `traveller-android-app`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the legacy Android SDK is configured.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
 ## Configuration and Secrets
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
+- Traveller generates a placeholder `Constants.java` from `Constants.java.example` when the local credentials file is missing. Do not commit real Parse credentials.
 
 ## Security and Privacy Notes
 
