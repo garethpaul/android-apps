@@ -2,15 +2,19 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        maven {
+            url 'https://repo1.maven.org/maven2'
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:0.8.3'
     }
 }
 
 allprojects {
     repositories {
-        mavenCentral()
+        maven {
+            url 'https://repo1.maven.org/maven2'
+        }
     }
 }

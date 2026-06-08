@@ -1,0 +1,9 @@
+package com.requestlabs.traveller;
+
+final class Constants {
+    static final String api_key = "parse-application-id";
+    static final String client_id = "parse-client-key";
+
+    private Constants() {
+    }
+}
