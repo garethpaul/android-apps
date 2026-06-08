@@ -38,6 +38,12 @@ Additional scan context:
 ```bash
 git clone https://github.com/garethpaul/android-apps.git
 cd android-apps
+scripts/check-baseline.sh
+scripts/prepare-traveller-constants.sh
+cd traveller-android-app
+./gradlew lint --no-daemon
+./gradlew check --no-daemon
+./gradlew assembleDebug --no-daemon
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
@@ -48,13 +54,16 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `gradle test` or Android Studio's test runner when the SDK is configured
+- `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
+- From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
 ## Configuration and Secrets
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
+- Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
+- Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
 
 ## Security and Privacy Notes
 

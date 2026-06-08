@@ -62,6 +62,15 @@ if [ ! -f "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestla
   exit 1
 fi
 
+if [ ! -x "$ROOT_DIR/scripts/prepare-traveller-constants.sh" ]; then
+  printf '%s\n' "Traveller constants preparation helper is missing or not executable." >&2
+  exit 1
+fi
+
+require_contains "traveller-android-app/.gitignore" \
+  "Constants.java" \
+  "Generated Constants.java must stay ignored."
+
 if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
   printf '%s\n' "CHANGES.md is missing." >&2
   exit 1
@@ -86,5 +95,7 @@ require_contains "README.md" "Android build-tools 24.0.3" \
   "README must document the pinned Android build-tools version."
 require_contains "README.md" "Constants.java.example" \
   "README must document the Parse credential template."
+require_contains "README.md" "scripts/prepare-traveller-constants.sh" \
+  "README must document the constants preparation helper."
 
 printf '%s\n' "Traveller Android baseline checks passed."

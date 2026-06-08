@@ -8,3 +8,5 @@
   removing the unused starter layout.
 - Added a narrow lint configuration for the intentionally pinned legacy Android
   dependency baseline and obsolete lint API database limitation.
+- Added a local Traveller constants preparation contract so ignored Parse
+  credential files can be created from the checked-in example.
