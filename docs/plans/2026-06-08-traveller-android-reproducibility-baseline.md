@@ -9,13 +9,13 @@ date: 2026-06-08
 
 ## Summary
 
-Raise the engineering baseline for the legacy Traveller Android app by making dependency resolution deterministic, removing an insecure Gradle wrapper URL, pinning an installable SDK-19 build-tools version, documenting the missing local configuration required by the Parse-backed app, and adding a lightweight source check that can run before a compatible Android SDK is configured.
+Raise the engineering baseline for the legacy Traveller Android app by making dependency resolution deterministic, removing an insecure Gradle wrapper URL, pinning a host-compatible Android build-tools version, documenting the missing local configuration required by the Parse-backed app, and adding a lightweight source check that can run before a compatible Android SDK is configured.
 
 ---
 
 ## Problem Frame
 
-The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Plugin 0.8.x, Parse 1.5.0, dynamic dependency versions, and almost no setup documentation. A broad Android migration is high risk without a reproducible starting point, especially because this environment does not provide the compatible SDK 19/build-tools 19 setup the project expects and the app depends on an ignored `Constants.java` file for Parse credentials.
+The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Plugin 0.8.x, Parse 1.5.0, dynamic dependency versions, and almost no setup documentation. A broad Android migration is high risk without a reproducible starting point, especially because older SDK-19 build-tools ship 32-bit host binaries that do not run here and the app depends on an ignored `Constants.java` file for Parse credentials.
 
 ---
 
@@ -35,7 +35,7 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 ## Key Technical Decisions
 
 - **Pin only the legacy coordinates:** Use fixed versions compatible with compile SDK 19 instead of migrating the Android toolchain in the same pass.
-- **Use an installable SDK-19 build-tools pin:** Use build-tools 19.1.0 because it is the SDK-19-era package available from the current SDK manager.
+- **Use a host-compatible build-tools pin:** Use build-tools 24.0.3 because its 64-bit `aapt` runs on this host while compile and target SDK remain at 19.
 - **Use HTTPS without changing Gradle:** Keeping Gradle 1.10 avoids widening the change while removing avoidable wrapper and Maven transport risks.
 - **Keep Parse secrets out of git:** Provide `Constants.java.example` and keep real `Constants.java` ignored.
 - **Add SDK-free checks:** A shell script can validate pinned dependency declarations and required template/docs even when `./gradlew` cannot configure without a compatible Android SDK.
@@ -65,7 +65,7 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
   - `traveller-android-app/build.gradle` no longer contains `com.android.tools.build:gradle:0.8.+`.
   - `traveller-android-app/build.gradle` uses an HTTPS Maven Central URL.
   - `traveller-android-app/traveller/build.gradle` no longer contains `appcompat-v7:+`.
-  - `traveller-android-app/traveller/build.gradle` pins build-tools 19.1.0.
+  - `traveller-android-app/traveller/build.gradle` pins build-tools 24.0.3.
   - `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` uses an HTTPS distribution URL.
 - **Verification:** `scripts/check-baseline.sh`, `cd traveller-android-app && ./gradlew tasks --no-daemon`
 
@@ -101,7 +101,7 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 - **Test Scenarios:**
   - README lists `scripts/check-baseline.sh`.
   - README lists `cd traveller-android-app && ./gradlew tasks --no-daemon`.
-  - README lists Android build-tools 19.1.0.
+  - README lists Android build-tools 24.0.3.
   - README explains that Android SDK prerequisites are required before Gradle verification can pass.
   - README identifies Parse and Android toolchain modernization as future work.
 - **Verification:** Manual README review
