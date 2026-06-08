@@ -1,5 +1,8 @@
 # Android Apps
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 Personal Android app experiments. The current checked-in project is the legacy
 Traveller app under `traveller-android-app/`.
 
