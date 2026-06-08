@@ -1,5 +1,8 @@
 # android-apps
 
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 ## Overview
 
 `garethpaul/android-apps` is an Android application or sample. Personal Android Apps
@@ -76,4 +79,3 @@ Keep changes small and tied to the project that is already present in this repos
 Prior README summary:
 
 > Android Apps <!-- README-OVERVIEW-IMAGE --> Personal Android app experiments. The current checked-in project is the legacy Traveller app under `traveller-android-app/`. Traveller Toolchain Traveller uses an old Android build stack: - Gradle wrapper 1.10 - Android Gradle Plugin 0.8.3 - compile SDK 19 / target SDK 19 - Android build-tools 24.0.3 - Parse 1.5.0 from `traveller/libs/Parse-1.5.0.jar` Configure an Android SDK path before running Gradle:
-
