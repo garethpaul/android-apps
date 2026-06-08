@@ -36,6 +36,9 @@ require_contains "traveller-android-app/build.gradle" \
   "Maven Central repositories must use HTTPS."
 
 require_contains "traveller-android-app/traveller/build.gradle" \
+  "buildToolsVersion \"19.1.0\"" \
+  "Android build-tools must stay pinned to 19.1.0."
+require_contains "traveller-android-app/traveller/build.gradle" \
   "com.android.support:appcompat-v7:19.1.0" \
   "appcompat must stay pinned to 19.1.0."
 require_absent "traveller-android-app/traveller/build.gradle" \
@@ -63,6 +66,8 @@ require_contains "README.md" "scripts/check-baseline.sh" \
   "README must document the SDK-free baseline check."
 require_contains "README.md" "./gradlew tasks --no-daemon" \
   "README must document Gradle task verification."
+require_contains "README.md" "Android build-tools 19.1.0" \
+  "README must document the pinned Android build-tools version."
 require_contains "README.md" "Constants.java.example" \
   "README must document the Parse credential template."
 
