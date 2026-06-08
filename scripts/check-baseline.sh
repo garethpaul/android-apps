@@ -31,6 +31,9 @@ require_contains "traveller-android-app/build.gradle" \
 require_absent "traveller-android-app/build.gradle" \
   "com.android.tools.build:gradle:0.8.+" \
   "Android Gradle Plugin must not use a dynamic version."
+require_contains "traveller-android-app/build.gradle" \
+  "url 'https://repo1.maven.org/maven2'" \
+  "Maven Central repositories must use HTTPS."
 
 require_contains "traveller-android-app/traveller/build.gradle" \
   "com.android.support:appcompat-v7:19.1.0" \
@@ -46,6 +49,11 @@ require_absent "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" 
   "distributionUrl=http\\://services.gradle.org" \
   "Gradle wrapper distribution must not use HTTP."
 
+if [ ! -x "$ROOT_DIR/traveller-android-app/gradlew" ]; then
+  printf '%s\n' "Gradle wrapper must be executable." >&2
+  exit 1
+fi
+
 if [ ! -f "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java.example" ]; then
   printf '%s\n' "Parse credential template is missing." >&2
   exit 1
@@ -53,6 +61,8 @@ fi
 
 require_contains "README.md" "scripts/check-baseline.sh" \
   "README must document the SDK-free baseline check."
+require_contains "README.md" "./gradlew tasks --no-daemon" \
+  "README must document Gradle task verification."
 require_contains "README.md" "Constants.java.example" \
   "README must document the Parse credential template."
 

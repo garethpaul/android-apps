@@ -10,6 +10,7 @@ Traveller uses an old Android build stack:
 - Gradle wrapper 1.10
 - Android Gradle Plugin 0.8.3
 - compile SDK 19 / target SDK 19
+- Android build-tools 19.0.3
 - Parse 1.5.0 from `traveller/libs/Parse-1.5.0.jar`
 
 Configure an Android SDK path before running Gradle:
@@ -54,7 +55,9 @@ cd traveller-android-app
 ```
 
 If Gradle reports that the SDK location cannot be found, configure
-`ANDROID_HOME` or `local.properties` and rerun the command.
+`ANDROID_HOME` or `local.properties` and rerun the command. If it reports
+`failed to find Build Tools revision 19.0.3`, install that legacy build-tools
+package into the configured SDK.
 
 ## Modernization Notes
 
