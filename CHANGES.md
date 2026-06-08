@@ -12,3 +12,5 @@
   credential files can be created from the checked-in example.
 - Added `make check` as the repository-standard wrapper around the SDK-free
   Traveller baseline.
+- Fixed Traveller row inflation to preserve parent layout params and removed
+  duplicate `Item` Parse subclass registration.

@@ -67,6 +67,20 @@ if [ ! -x "$ROOT_DIR/scripts/prepare-traveller-constants.sh" ]; then
   exit 1
 fi
 
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "inflate(R.layout.item_row_item, null)" \
+  "ItemAdapter must inflate rows with parent layout params."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "inflate(R.layout.item_row_item, parent, false)" \
+  "ItemAdapter must pass the parent with attachToRoot=false."
+
+register_count=$(grep -Fc "ParseObject.registerSubclass(Item.class)" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$register_count" -ne 1 ]; then
+  printf '%s\n' "Item subclass registration should happen exactly once." >&2
+  exit 1
+fi
+
 require_contains "traveller-android-app/.gitignore" \
   "Constants.java" \
   "Generated Constants.java must stay ignored."

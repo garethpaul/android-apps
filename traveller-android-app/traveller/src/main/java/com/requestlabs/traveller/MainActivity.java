@@ -35,7 +35,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         ParseObject.registerSubclass(Item.class);
         setContentView(R.layout.item_activity);
         ParseAnalytics.trackAppOpened(getIntent());
-        ParseObject.registerSubclass(Item.class);
 
         mAdapter = new ItemAdapter(this, new ArrayList<Item>());
 

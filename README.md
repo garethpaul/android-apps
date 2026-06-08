@@ -57,6 +57,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make check` - repository-standard wrapper around the SDK-free Traveller baseline checks
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
+- The baseline check also protects source-level contracts for Traveller row
+  inflation and Parse subclass registration.
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.

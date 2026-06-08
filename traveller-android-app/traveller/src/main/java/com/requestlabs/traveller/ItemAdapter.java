@@ -23,7 +23,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
     public View getView(int position, View convertView, ViewGroup parent){
         if(convertView == null){
             LayoutInflater mLayoutInflater = LayoutInflater.from(mContext);
-            convertView = mLayoutInflater.inflate(R.layout.item_row_item, null);
+            convertView = mLayoutInflater.inflate(R.layout.item_row_item, parent, false);
         }
 
         Item task = mTasks.get(position);
