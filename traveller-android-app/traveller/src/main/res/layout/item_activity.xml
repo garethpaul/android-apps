@@ -20,7 +20,7 @@
             android:layout_weight="1"
             android:ems="11"
             android:inputType="text"
-            android:hint="Enter an Item">
+            android:hint="@string/item_input_hint">
             <requestFocus />
         </EditText>
 
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="createTask"
-            android:text="Save" />
+            android:text="@string/save_item" />
     </LinearLayout>
 
     <ListView

@@ -62,10 +62,26 @@ if [ ! -f "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestla
   exit 1
 fi
 
+if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
+  printf '%s\n' "CHANGES.md is missing." >&2
+  exit 1
+fi
+
+require_contains "traveller-android-app/traveller/lint.xml" \
+  "GradleDependency" \
+  "lint.xml must document the intentionally pinned legacy dependency baseline."
+require_contains "traveller-android-app/traveller/lint.xml" \
+  "LintError" \
+  "lint.xml must document the obsolete lint API database limitation."
+
 require_contains "README.md" "scripts/check-baseline.sh" \
   "README must document the SDK-free baseline check."
-require_contains "README.md" "./gradlew tasks --no-daemon" \
-  "README must document Gradle task verification."
+require_contains "README.md" "./gradlew lint --no-daemon" \
+  "README must document Gradle lint verification."
+require_contains "README.md" "./gradlew check --no-daemon" \
+  "README must document Gradle check verification."
+require_contains "README.md" "./gradlew assembleDebug --no-daemon" \
+  "README must document Gradle build verification."
 require_contains "README.md" "Android build-tools 24.0.3" \
   "README must document the pinned Android build-tools version."
 require_contains "README.md" "Constants.java.example" \

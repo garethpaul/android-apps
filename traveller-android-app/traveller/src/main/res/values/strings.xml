@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Traveller</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="item_input_hint">Enter an Item</string>
+    <string name="save_item">Save</string>
 
 </resources>

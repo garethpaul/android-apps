@@ -2,7 +2,7 @@
 *.apk
 *.ap_
 
-Constants.java 
+Constants.java
 Constants.class
 
 # Files for the Dalvik VM

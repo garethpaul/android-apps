@@ -46,11 +46,12 @@ scripts/check-baseline.sh
 ```
 
 Then run Gradle from the nested project directory after configuring an Android
-SDK:
+SDK and local Parse credentials:
 
 ```sh
 cd traveller-android-app
-./gradlew tasks --no-daemon
+./gradlew lint --no-daemon
+./gradlew check --no-daemon
 ./gradlew assembleDebug --no-daemon
 ```
 
@@ -63,6 +64,8 @@ package into the configured SDK.
 
 The current baseline pins the Android Gradle Plugin and appcompat dependencies
 instead of resolving dynamic `+` versions, and uses HTTPS for wrapper and Maven
-resolution. A future modernization pass should migrate Gradle, the Android
+resolution. `traveller/lint.xml` suppresses only the intentionally pinned legacy
+dependency warning and the obsolete lint API database error from this old
+toolchain. A future modernization pass should migrate Gradle, the Android
 Gradle Plugin, SDK levels, appcompat/AndroidX, Parse, credential injection, and
 Android tests together in an SDK-capable environment.

@@ -1,0 +1,10 @@
+# Changes
+
+## 2026-06-08
+
+- Added a repository changelog and expanded the documented Traveller Android
+  verification gate.
+- Fixed Android lint findings by moving UI text into string resources and
+  removing the unused starter layout.
+- Added a narrow lint configuration for the intentionally pinned legacy Android
+  dependency baseline and obsolete lint API database limitation.
