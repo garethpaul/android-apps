@@ -45,7 +45,7 @@ outside the repository, and examples should remain clearly non-secret.
 Future network or account changes should document what user data is collected,
 where it is sent, and how local developers configure it safely.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Real Parse credentials, signing files, or local machine paths
 - Broad AndroidX or Gradle migrations mixed with unrelated app behavior changes
