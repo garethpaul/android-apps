@@ -76,6 +76,13 @@ if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
   exit 1
 fi
 
+require_contains "Makefile" \
+  "scripts/check-baseline.sh" \
+  "Makefile must expose the SDK-free baseline check."
+require_contains "docs/plans/2026-06-08-traveller-constants-helper.md" \
+  "make check" \
+  "Traveller constants helper plan must record make check verification."
+
 require_contains "traveller-android-app/traveller/lint.xml" \
   "GradleDependency" \
   "lint.xml must document the intentionally pinned legacy dependency baseline."
@@ -85,6 +92,8 @@ require_contains "traveller-android-app/traveller/lint.xml" \
 
 require_contains "README.md" "scripts/check-baseline.sh" \
   "README must document the SDK-free baseline check."
+require_contains "README.md" "make check" \
+  "README must document the make check wrapper."
 require_contains "README.md" "./gradlew lint --no-daemon" \
   "README must document Gradle lint verification."
 require_contains "README.md" "./gradlew check --no-daemon" \

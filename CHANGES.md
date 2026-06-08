@@ -10,3 +10,5 @@
   dependency baseline and obsolete lint API database limitation.
 - Added a local Traveller constants preparation contract so ignored Parse
   credential files can be created from the checked-in example.
+- Added `make check` as the repository-standard wrapper around the SDK-free
+  Traveller baseline.

@@ -38,6 +38,7 @@ Additional scan context:
 ```bash
 git clone https://github.com/garethpaul/android-apps.git
 cd android-apps
+make check
 scripts/check-baseline.sh
 scripts/prepare-traveller-constants.sh
 cd traveller-android-app
@@ -54,6 +55,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
+- `make check` - repository-standard wrapper around the SDK-free Traveller baseline checks
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
@@ -76,6 +78,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Maintenance Notes
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
+- See `CHANGES.md` and `docs/plans/2026-06-08-traveller-constants-helper.md`
+  for the current constants-helper baseline.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

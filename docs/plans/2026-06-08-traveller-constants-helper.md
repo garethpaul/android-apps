@@ -51,5 +51,6 @@ Approach:
 
 ## Verification
 
+- `make check`
 - `scripts/check-baseline.sh`
 - `git diff --check`
