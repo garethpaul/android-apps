@@ -44,6 +44,15 @@ require_contains "traveller-android-app/traveller/build.gradle" \
 require_absent "traveller-android-app/traveller/build.gradle" \
   "appcompat-v7:+" \
   "appcompat must not use a dynamic version."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "task generateConstants" \
+  "Traveller Gradle build must generate Constants.java from the template."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "Constants.java.example" \
+  "Traveller Gradle build must reference Constants.java.example."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "preBuild.dependsOn generateConstants" \
+  "Traveller preBuild must depend on Constants.java generation."
 
 require_contains "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" \
   "distributionUrl=https\\://services.gradle.org/distributions/gradle-1.10-all.zip" \
@@ -86,5 +95,7 @@ require_contains "README.md" "Android build-tools 24.0.3" \
   "README must document the pinned Android build-tools version."
 require_contains "README.md" "Constants.java.example" \
   "README must document the Parse credential template."
+require_contains "README.md" 'generates a placeholder `Constants.java`' \
+  "README must document automatic placeholder Constants.java generation."
 
 printf '%s\n' "Traveller Android baseline checks passed."
