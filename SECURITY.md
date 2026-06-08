@@ -24,7 +24,7 @@ Helpful reports include:
 
 ## Project Security Posture
 
-- This repository appears to be a android mobile application or sample. The active security scope is the code and documentation on the default branch.
+- This repository appears to be a Android mobile application or sample. The active security scope is the code and documentation on the default branch.
 - Review found external API integrations or credential-adjacent configuration; changes in those areas should receive security-focused review before merge.
 - Review found network clients, sockets, web APIs, or service endpoints; changes in those areas should receive security-focused review before merge.
 - Review found mobile permission or privacy-sensitive data handling; changes in those areas should receive security-focused review before merge.
