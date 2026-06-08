@@ -73,9 +73,3 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Contributing
 
 Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
-
-## Existing Project Notes
-
-Prior README summary:
-
-> Android Apps Personal Android app experiments. The current checked-in project is the legacy Traveller app under `traveller-android-app/`. Traveller Toolchain Traveller uses an old Android build stack: - Gradle wrapper 1.10 - Android Gradle Plugin 0.8.3 - compile SDK 19 / target SDK 19 - Android build-tools 24.0.3 - Parse 1.5.0 from `traveller/libs/Parse-1.5.0.jar` Configure an Android SDK path before running Gradle:
