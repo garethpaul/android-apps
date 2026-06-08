@@ -51,3 +51,6 @@ where it is sent, and how local developers configure it safely.
 - Broad AndroidX or Gradle migrations mixed with unrelated app behavior changes
 - New backend dependencies without setup, privacy, and verification notes
 - Changes that remove the existing baseline checks without replacing them
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
