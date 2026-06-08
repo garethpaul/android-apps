@@ -1,5 +1,8 @@
 ## Android Apps Vision
 
+This document explains the current state and direction of the project.
+Project overview and developer docs: [`README.md`](README.md)
+
 Android Apps is a collection of personal Android app experiments. The current
 checked-in project is the legacy Traveller app under `traveller-android-app/`.
 
