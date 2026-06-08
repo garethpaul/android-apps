@@ -39,6 +39,11 @@ Contribution rules:
 
 ## Security And Privacy
 
+Canonical security policy and reporting:
+
+- [`SECURITY.md`](SECURITY.md)
+
+
 Traveller uses local Parse credential configuration. Real credentials must stay
 outside the repository, and examples should remain clearly non-secret.
 
