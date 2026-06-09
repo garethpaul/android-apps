@@ -123,8 +123,27 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if(mAdapter == null){
+            return;
+        }
+
         Item task = mAdapter.getItem(position);
-        TextView taskDescription = (TextView) view.findViewById(R.id.task_description);
+        if(task == null){
+            return;
+        }
+
+        if(view == null){
+            return;
+        }
+
+        View taskDescriptionView = view.findViewById(R.id.task_description);
+        TextView taskDescription = null;
+        if(taskDescriptionView instanceof TextView){
+            taskDescription = (TextView) taskDescriptionView;
+        }
+        if(taskDescription == null){
+            return;
+        }
 
         task.setCompleted(!task.isCompleted());
 

@@ -78,6 +78,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   saving Parse `Item` records.
 - Traveller treats a missing task input view as an empty description so stale
   layouts do not crash task creation.
+- Traveller ignores item toggle events when the adapter, selected item, row
+  view, or row text view is unavailable or malformed.
 - Traveller disables Android backup in the checked-in manifest so local Parse
   state is not included in platform backups by default.
 - Traveller shows a localized error toast when Parse task loading fails instead
@@ -100,6 +102,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   task input normalization contract.
 - See `docs/plans/2026-06-09-traveller-task-input-null-guard.md` for the task
   input null guard.
+- See `docs/plans/2026-06-09-traveller-item-toggle-guards.md` for item-toggle
+  null guards.
 - See `docs/plans/2026-06-09-traveller-backup-policy.md` for the manifest
   backup policy contract.
 - See `docs/plans/2026-06-09-traveller-parse-query-failures.md` for the task

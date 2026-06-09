@@ -111,6 +111,21 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
   '<string name="load_items_error">Unable to load traveller items.</string>' \
   "Traveller task loading error string is missing."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(mAdapter == null)" \
+  "Traveller item toggles must guard missing adapters."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(task == null)" \
+  "Traveller item toggles must guard missing task items."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(view == null)" \
+  "Traveller item toggles must guard missing row views."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "taskDescriptionView instanceof TextView" \
+  "Traveller item toggles must guard malformed row text views."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(taskDescription == null)" \
+  "Traveller item toggles must guard missing row text views."
 
 register_count=$(grep -Fc "ParseObject.registerSubclass(Item.class)" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")

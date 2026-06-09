@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Guarded Traveller item toggles when the adapter, selected item, row view, or
+  row text view is unavailable or malformed.
+- Added SDK-free baseline coverage for item-toggle null guards.
 - Guarded Traveller task description normalization when the task input view or
   text value is unavailable.
 - Added explicit `make lint`, `make test`, and guarded `make build` gates so
