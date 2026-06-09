@@ -24,11 +24,14 @@ Priority:
 - Keep Traveller item creation from persisting empty-looking task records
 - Keep task creation safe when legacy input views are missing
 - Keep task toggle handling safe when legacy row state is missing or malformed
+- Keep task toggle handling safe when list-click positions are stale
 - Keep Traveller row rendering safe when legacy row data or views are malformed
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
   backend internals
 - Keep IDE workspace metadata out of the shared Traveller project baseline
+- Keep nested Android Studio metadata out of the shared Traveller project
+  baseline
 - Make old Gradle, Android plugin, and build-tools requirements explicit
 
 Next priorities:

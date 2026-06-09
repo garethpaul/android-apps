@@ -2,6 +2,13 @@
 
 ## 2026-06-09
 
+- Guarded Traveller item toggles when list-click positions fall outside the
+  adapter bounds.
+- Added SDK-free baseline coverage for stale item-toggle positions.
+- Removed tracked nested Android Studio `.idea` metadata from the Traveller
+  project.
+- Tightened the SDK-free baseline to reject nested `.idea/` and `.vscode/`
+  metadata.
 - Guarded Traveller row rendering when the backing item, task description, or
   row text view is missing or malformed.
 - Added SDK-free baseline coverage for item-row rendering guards.

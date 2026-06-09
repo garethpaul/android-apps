@@ -80,14 +80,17 @@ When the required SDK or runtime is unavailable, use static checks and source re
   layouts do not crash task creation.
 - Traveller ignores item toggle events when the adapter, selected item, row
   view, or row text view is unavailable or malformed.
+- Traveller ignores item toggle events whose adapter position is outside the
+  current list bounds.
 - Traveller row rendering tolerates missing items, missing descriptions, and
   malformed row text views without crashing the list adapter.
 - Traveller disables Android backup in the checked-in manifest so local Parse
   state is not included in platform backups by default.
 - Traveller shows a localized error toast when Parse task loading fails instead
   of silently leaving stale or empty list state.
-- Local IDE metadata stays ignored so Android Studio, IntelliJ, and VS Code
-  workspace files do not become part of the shared Traveller baseline.
+- Local IDE metadata stays ignored, including nested Android Studio project
+  metadata, so editor workspace files do not become part of the shared
+  Traveller baseline.
 
 ## Security and Privacy Notes
 
@@ -108,6 +111,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   input null guard.
 - See `docs/plans/2026-06-09-traveller-item-toggle-guards.md` for item-toggle
   null guards.
+- See `docs/plans/2026-06-09-traveller-item-toggle-position-guard.md` for
+  stale adapter-position guards.
 - See `docs/plans/2026-06-09-traveller-item-row-rendering-guards.md` for item
   row rendering guards.
 - See `docs/plans/2026-06-09-traveller-backup-policy.md` for the manifest
@@ -118,6 +123,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   repository lint, test, and build target contract.
 - See `docs/plans/2026-06-09-traveller-editor-metadata-ignore.md` for the
   local editor metadata ignore contract.
+- See `docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md` for
+  nested Android Studio metadata cleanup.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

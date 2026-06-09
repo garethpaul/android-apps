@@ -115,6 +115,9 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "if(mAdapter == null)" \
   "Traveller item toggles must guard missing adapters."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(position < 0 || position >= mAdapter.getCount())" \
+  "Traveller item toggles must guard stale adapter positions."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "if(task == null)" \
   "Traveller item toggles must guard missing task items."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
@@ -162,7 +165,16 @@ require_contains ".gitignore" \
   ".vscode/" \
   "VS Code workspace metadata must stay ignored."
 
-tracked_editor_files=$(git -C "$ROOT_DIR" ls-files -- '*.iml' .idea .vscode)
+tracked_editor_files=$(git -C "$ROOT_DIR" ls-files -- \
+  '*.iml' \
+  '.idea' \
+  '.idea/**' \
+  '*/.idea' \
+  '*/.idea/**' \
+  '.vscode' \
+  '.vscode/**' \
+  '*/.vscode' \
+  '*/.vscode/**')
 if [ -n "$tracked_editor_files" ]; then
   printf '%s\n' "IDE metadata must not be tracked: $tracked_editor_files" >&2
   exit 1
@@ -233,11 +245,23 @@ require_contains "docs/plans/2026-06-09-traveller-editor-metadata-ignore.md" \
 require_contains "docs/plans/2026-06-09-traveller-editor-metadata-ignore.md" \
   "make check" \
   "Traveller editor metadata ignore plan must document make check verification."
+require_contains "docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md" \
+  "Status: Completed" \
+  "Traveller nested editor metadata cleanup plan must be completed."
+require_contains "docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md" \
+  "make check" \
+  "Traveller nested editor metadata cleanup plan must document make check verification."
 require_contains "docs/plans/2026-06-09-traveller-item-row-rendering-guards.md" \
   "Status: Completed" \
   "Traveller item row rendering guard plan must be completed."
 require_contains "docs/plans/2026-06-09-traveller-item-row-rendering-guards.md" \
   "make check" \
   "Traveller item row rendering guard plan must document make check verification."
+require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md" \
+  "Status: Completed" \
+  "Traveller item toggle position guard plan must be completed."
+require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md" \
+  "make check" \
+  "Traveller item toggle position guard plan must document make check verification."
 
 printf '%s\n' "Traveller Android baseline checks passed."

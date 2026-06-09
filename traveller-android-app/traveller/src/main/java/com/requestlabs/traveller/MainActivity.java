@@ -127,6 +127,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             return;
         }
 
+        if(position < 0 || position >= mAdapter.getCount()){
+            return;
+        }
+
         Item task = mAdapter.getItem(position);
         if(task == null){
             return;
