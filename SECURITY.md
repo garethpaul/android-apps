@@ -31,6 +31,8 @@ Helpful reports include:
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - Review found database, model, query, or persistence-related code; changes in those areas should receive security-focused review before merge.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
+- IDE workspace metadata should stay untracked so local SDK paths, launch
+  settings, and editor preferences are not committed.
 
 ## Mobile Privacy Notes
 

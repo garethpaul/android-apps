@@ -84,6 +84,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   state is not included in platform backups by default.
 - Traveller shows a localized error toast when Parse task loading fails instead
   of silently leaving stale or empty list state.
+- Local IDE metadata stays ignored so Android Studio, IntelliJ, and VS Code
+  workspace files do not become part of the shared Traveller baseline.
 
 ## Security and Privacy Notes
 
@@ -110,6 +112,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   loading failure contract.
 - See `docs/plans/2026-06-09-traveller-make-gate-targets.md` for the
   repository lint, test, and build target contract.
+- See `docs/plans/2026-06-09-traveller-editor-metadata-ignore.md` for the
+  local editor metadata ignore contract.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

@@ -15,6 +15,11 @@ Constants.class
 bin/
 gen/
 
+# IDE metadata
+.idea/
+.vscode/
+*.iml
+
 # Gradle files
 .gradle/
 build/

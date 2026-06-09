@@ -27,6 +27,7 @@ Priority:
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
   backend internals
+- Keep IDE workspace metadata out of the shared Traveller project baseline
 - Make old Gradle, Android plugin, and build-tools requirements explicit
 
 Next priorities:

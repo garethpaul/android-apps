@@ -137,6 +137,21 @@ fi
 require_contains "traveller-android-app/.gitignore" \
   "Constants.java" \
   "Generated Constants.java must stay ignored."
+require_contains ".gitignore" \
+  "*.iml" \
+  "IntelliJ module files must stay ignored."
+require_contains ".gitignore" \
+  ".idea/" \
+  "IntelliJ workspace metadata must stay ignored."
+require_contains ".gitignore" \
+  ".vscode/" \
+  "VS Code workspace metadata must stay ignored."
+
+tracked_editor_files=$(git -C "$ROOT_DIR" ls-files -- '*.iml' .idea .vscode)
+if [ -n "$tracked_editor_files" ]; then
+  printf '%s\n' "IDE metadata must not be tracked: $tracked_editor_files" >&2
+  exit 1
+fi
 
 if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
   printf '%s\n' "CHANGES.md is missing." >&2
@@ -197,5 +212,11 @@ require_contains "docs/plans/2026-06-09-traveller-make-gate-targets.md" \
 require_contains "docs/plans/2026-06-09-traveller-task-input-null-guard.md" \
   "make check" \
   "Traveller task input null guard plan must document make check verification."
+require_contains "docs/plans/2026-06-09-traveller-editor-metadata-ignore.md" \
+  "Status: Completed" \
+  "Traveller editor metadata ignore plan must be completed."
+require_contains "docs/plans/2026-06-09-traveller-editor-metadata-ignore.md" \
+  "make check" \
+  "Traveller editor metadata ignore plan must document make check verification."
 
 printf '%s\n' "Traveller Android baseline checks passed."
