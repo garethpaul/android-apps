@@ -20,6 +20,7 @@ Priority:
 - Preserve the Traveller project structure and documented legacy toolchain
 - Keep Parse credentials out of git through `Constants.java.example`
 - Maintain SDK-free baseline checks for quick verification
+- Keep lint, test, and build gate targets available from the repository root
 - Keep Traveller item creation from persisting empty-looking task records
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
@@ -39,7 +40,7 @@ Next priorities:
 Contribution rules:
 
 - One PR = one focused experiment or maintenance topic.
-- Run `scripts/check-baseline.sh` before pushing changes.
+- Run `make lint`, `make test`, and `make build` before pushing changes.
 - When changing Android code, run the nested Gradle checks from
   `traveller-android-app/` with a compatible SDK.
 - Keep real credentials, signing material, and local SDK paths untracked.

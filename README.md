@@ -39,6 +39,9 @@ Additional scan context:
 git clone https://github.com/garethpaul/android-apps.git
 cd android-apps
 make check
+make lint
+make test
+make build
 scripts/check-baseline.sh
 scripts/prepare-traveller-constants.sh
 cd traveller-android-app
@@ -55,7 +58,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make check` - repository-standard wrapper around the SDK-free Traveller baseline checks
+- `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
+- `make test` - runs the SDK-free Traveller baseline checks
+- `make build` - attempts the legacy Traveller Gradle debug build when Android SDK configuration and local constants are present; otherwise it reports a skip
+- `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - The baseline check also protects source-level contracts for Traveller row
   inflation, Parse subclass registration, and task input normalization.
@@ -94,6 +100,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   backup policy contract.
 - See `docs/plans/2026-06-09-traveller-parse-query-failures.md` for the task
   loading failure contract.
+- See `docs/plans/2026-06-09-traveller-make-gate-targets.md` for the
+  repository lint, test, and build target contract.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

@@ -125,6 +125,18 @@ fi
 require_contains "Makefile" \
   "scripts/check-baseline.sh" \
   "Makefile must expose the SDK-free baseline check."
+require_contains "Makefile" \
+  "lint:" \
+  "Makefile must expose a lint gate."
+require_contains "Makefile" \
+  "test:" \
+  "Makefile must expose a test gate."
+require_contains "Makefile" \
+  "build:" \
+  "Makefile must expose a build gate."
+require_contains "Makefile" \
+  "verify: lint test build" \
+  "Makefile verify must run lint, test, and build gates in order."
 require_contains "docs/plans/2026-06-08-traveller-constants-helper.md" \
   "make check" \
   "Traveller constants helper plan must record make check verification."
@@ -140,6 +152,12 @@ require_contains "README.md" "scripts/check-baseline.sh" \
   "README must document the SDK-free baseline check."
 require_contains "README.md" "make check" \
   "README must document the make check wrapper."
+require_contains "README.md" "make lint" \
+  "README must document the make lint gate."
+require_contains "README.md" "make test" \
+  "README must document the make test gate."
+require_contains "README.md" "make build" \
+  "README must document the make build gate."
 require_contains "README.md" "./gradlew lint --no-daemon" \
   "README must document Gradle lint verification."
 require_contains "README.md" "./gradlew check --no-daemon" \
@@ -152,5 +170,8 @@ require_contains "README.md" "Constants.java.example" \
   "README must document the Parse credential template."
 require_contains "README.md" "scripts/prepare-traveller-constants.sh" \
   "README must document the constants preparation helper."
+require_contains "docs/plans/2026-06-09-traveller-make-gate-targets.md" \
+  "make lint" \
+  "Traveller Make gate plan must document make lint verification."
 
 printf '%s\n' "Traveller Android baseline checks passed."
