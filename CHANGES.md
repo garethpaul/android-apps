@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Guarded Traveller task description normalization when the task input view or
+  text value is unavailable.
 - Added explicit `make lint`, `make test`, and guarded `make build` gates so
   Traveller verification can follow the repository-wide pre-push order.
 - Disabled Android backup for the Traveller app and added an SDK-free manifest

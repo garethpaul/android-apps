@@ -68,6 +68,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
 
     private String normalizedTaskDescription() {
+        if(mTaskInput == null || mTaskInput.getText() == null){
+            return "";
+        }
         return mTaskInput.getText().toString().trim();
     }
 

@@ -88,6 +88,12 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "normalizedTaskDescription()" \
   "Traveller task creation must use a normalized task description helper."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(mTaskInput == null || mTaskInput.getText() == null)" \
+  "Traveller task description normalization must tolerate missing input views."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  'return "";' \
+  "Traveller task description normalization must return an empty description for missing input views."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "return mTaskInput.getText().toString().trim();" \
   "Traveller task descriptions must be trimmed before validation."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
@@ -173,5 +179,8 @@ require_contains "README.md" "scripts/prepare-traveller-constants.sh" \
 require_contains "docs/plans/2026-06-09-traveller-make-gate-targets.md" \
   "make lint" \
   "Traveller Make gate plan must document make lint verification."
+require_contains "docs/plans/2026-06-09-traveller-task-input-null-guard.md" \
+  "make check" \
+  "Traveller task input null guard plan must document make check verification."
 
 printf '%s\n' "Traveller Android baseline checks passed."

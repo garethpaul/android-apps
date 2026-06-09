@@ -22,6 +22,7 @@ Priority:
 - Maintain SDK-free baseline checks for quick verification
 - Keep lint, test, and build gate targets available from the repository root
 - Keep Traveller item creation from persisting empty-looking task records
+- Keep task creation safe when legacy input views are missing
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
   backend internals
