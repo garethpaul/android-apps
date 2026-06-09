@@ -4,6 +4,8 @@
 
 - Disabled Android backup for the Traveller app and added an SDK-free manifest
   contract so local Parse state is not backed up by default.
+- Made Traveller Parse query failures visible through a localized toast and
+  added a baseline contract so task loading errors are not silently ignored.
 
 ## 2026-06-08
 

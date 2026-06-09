@@ -72,6 +72,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   saving Parse `Item` records.
 - Traveller disables Android backup in the checked-in manifest so local Parse
   state is not included in platform backups by default.
+- Traveller shows a localized error toast when Parse task loading fails instead
+  of silently leaving stale or empty list state.
 
 ## Security and Privacy Notes
 
@@ -90,6 +92,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   task input normalization contract.
 - See `docs/plans/2026-06-09-traveller-backup-policy.md` for the manifest
   backup policy contract.
+- See `docs/plans/2026-06-09-traveller-parse-query-failures.md` for the task
+  loading failure contract.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

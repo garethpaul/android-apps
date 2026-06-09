@@ -93,6 +93,18 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "t.setDescription(description);" \
   "Traveller task creation must persist the normalized description."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(tasks != null)" \
+  "Traveller task loading must not ignore Parse query errors."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(error == null && tasks != null)" \
+  "Traveller task loading must only refresh on successful Parse results."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "R.string.load_items_error" \
+  "Traveller task loading failures must use a localized error message."
+require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
+  '<string name="load_items_error">Unable to load traveller items.</string>' \
+  "Traveller task loading error string is missing."
 
 register_count=$(grep -Fc "ParseObject.registerSubclass(Item.class)" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")

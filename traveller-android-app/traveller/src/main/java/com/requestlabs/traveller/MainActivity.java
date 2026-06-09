@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseAnalytics;
@@ -24,7 +25,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private EditText mTaskInput;
     private ListView mListView;
-    private TextView mErrorField;
     private ItemAdapter mAdapter;
 
 
@@ -83,9 +83,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             @Override
             public void done(List<Item> tasks, ParseException error) {
-                if(tasks != null){
+                if(error == null && tasks != null){
                     mAdapter.clear();
                     mAdapter.addAll(tasks);
+                }else{
+                    Toast.makeText(
+                            MainActivity.this,
+                            R.string.load_items_error,
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
