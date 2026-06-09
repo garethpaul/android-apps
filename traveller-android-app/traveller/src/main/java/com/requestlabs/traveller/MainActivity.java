@@ -51,9 +51,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     //
     public void createTask(View v) {
-        if (mTaskInput.getText().length() > 0){
+        String description = normalizedTaskDescription();
+        if (description.length() > 0){
             Item t = new Item();
-            t.setDescription(mTaskInput.getText().toString());
+            t.setDescription(description);
             t.setCompleted(false);
             t.saveEventually();
             mTaskInput.setText("");
@@ -64,6 +65,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     //
+
+
+    private String normalizedTaskDescription() {
+        return mTaskInput.getText().toString().trim();
+    }
 
 
 

@@ -74,6 +74,19 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "inflate(R.layout.item_row_item, parent, false)" \
   "ItemAdapter must pass the parent with attachToRoot=false."
 
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "mTaskInput.getText().length()" \
+  "Traveller task creation must not validate raw EditText length."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "normalizedTaskDescription()" \
+  "Traveller task creation must use a normalized task description helper."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "return mTaskInput.getText().toString().trim();" \
+  "Traveller task descriptions must be trimmed before validation."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "t.setDescription(description);" \
+  "Traveller task creation must persist the normalized description."
+
 register_count=$(grep -Fc "ParseObject.registerSubclass(Item.class)" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
 if [ "$register_count" -ne 1 ]; then

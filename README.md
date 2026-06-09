@@ -58,7 +58,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - `make check` - repository-standard wrapper around the SDK-free Traveller baseline checks
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - The baseline check also protects source-level contracts for Traveller row
-  inflation and Parse subclass registration.
+  inflation, Parse subclass registration, and task input normalization.
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -68,6 +68,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 - Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
 - Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
+- Traveller trims task descriptions and rejects whitespace-only entries before
+  saving Parse `Item` records.
 
 ## Security and Privacy Notes
 
@@ -82,6 +84,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `CHANGES.md` and `docs/plans/2026-06-08-traveller-constants-helper.md`
   for the current constants-helper baseline.
+- See `docs/plans/2026-06-09-traveller-task-input-normalization.md` for the
+  task input normalization contract.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

@@ -14,3 +14,5 @@
   Traveller baseline.
 - Fixed Traveller row inflation to preserve parent layout params and removed
   duplicate `Item` Parse subclass registration.
+- Trimmed Traveller task input before validation and persistence so
+  whitespace-only entries are not saved.
