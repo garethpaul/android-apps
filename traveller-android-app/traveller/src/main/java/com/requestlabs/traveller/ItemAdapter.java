@@ -12,12 +12,10 @@ import android.widget.TextView;
 
 public class ItemAdapter extends ArrayAdapter<Item> {
     private Context mContext;
-    private List<Item> mTasks;
 
     public ItemAdapter(Context context, List<Item> objects) {
         super(context, R.layout.item_row_item, objects);
         this.mContext = context;
-        this.mTasks = objects;
     }
 
     public View getView(int position, View convertView, ViewGroup parent){
@@ -26,11 +24,24 @@ public class ItemAdapter extends ArrayAdapter<Item> {
             convertView = mLayoutInflater.inflate(R.layout.item_row_item, parent, false);
         }
 
-        Item task = mTasks.get(position);
+        View descriptionViewCandidate = convertView.findViewById(R.id.task_description);
+        if(!(descriptionViewCandidate instanceof TextView)){
+            return convertView;
+        }
 
-        TextView descriptionView = (TextView) convertView.findViewById(R.id.task_description);
+        TextView descriptionView = (TextView) descriptionViewCandidate;
+        Item task = getItem(position);
+        if(task == null){
+            descriptionView.setText("");
+            descriptionView.setPaintFlags(descriptionView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            return convertView;
+        }
 
-        descriptionView.setText(task.getDescription());
+        String description = task.getDescription();
+        if(description == null){
+            description = "";
+        }
+        descriptionView.setText(description);
 
         if(task.isCompleted()){
             descriptionView.setPaintFlags(descriptionView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);

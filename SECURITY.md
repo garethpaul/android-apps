@@ -33,6 +33,8 @@ Helpful reports include:
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 - IDE workspace metadata should stay untracked so local SDK paths, launch
   settings, and editor preferences are not committed.
+- Traveller row rendering should tolerate malformed local row data and stale
+  layouts without crashing before the user can recover.
 
 ## Mobile Privacy Notes
 

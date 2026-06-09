@@ -126,6 +126,21 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "if(taskDescription == null)" \
   "Traveller item toggles must guard missing row text views."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "mTasks.get(position)" \
+  "Traveller item rows must not assume backing-list positions are always valid."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "getItem(position)" \
+  "Traveller item rows must use the adapter item lookup."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "descriptionViewCandidate instanceof TextView" \
+  "Traveller item rows must guard malformed description views."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "if(task == null)" \
+  "Traveller item rows must guard missing task items."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
+  "if(description == null)" \
+  "Traveller item rows must guard missing task descriptions."
 
 register_count=$(grep -Fc "ParseObject.registerSubclass(Item.class)" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
@@ -218,5 +233,11 @@ require_contains "docs/plans/2026-06-09-traveller-editor-metadata-ignore.md" \
 require_contains "docs/plans/2026-06-09-traveller-editor-metadata-ignore.md" \
   "make check" \
   "Traveller editor metadata ignore plan must document make check verification."
+require_contains "docs/plans/2026-06-09-traveller-item-row-rendering-guards.md" \
+  "Status: Completed" \
+  "Traveller item row rendering guard plan must be completed."
+require_contains "docs/plans/2026-06-09-traveller-item-row-rendering-guards.md" \
+  "make check" \
+  "Traveller item row rendering guard plan must document make check verification."
 
 printf '%s\n' "Traveller Android baseline checks passed."

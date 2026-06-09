@@ -2,6 +2,9 @@
 
 ## 2026-06-09
 
+- Guarded Traveller row rendering when the backing item, task description, or
+  row text view is missing or malformed.
+- Added SDK-free baseline coverage for item-row rendering guards.
 - Removed tracked Traveller IDE module metadata and added an SDK-free baseline
   guard for `.iml`, `.idea/`, and `.vscode/` ignore rules.
 - Guarded Traveller item toggles when the adapter, selected item, row view, or
