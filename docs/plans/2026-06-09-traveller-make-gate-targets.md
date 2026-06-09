@@ -67,4 +67,5 @@ Approach:
 - `make test`
 - `make build`
 - `make check`
+- `make verify`
 - `git diff --check`
