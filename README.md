@@ -70,6 +70,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
 - Traveller trims task descriptions and rejects whitespace-only entries before
   saving Parse `Item` records.
+- Traveller disables Android backup in the checked-in manifest so local Parse
+  state is not included in platform backups by default.
 
 ## Security and Privacy Notes
 
@@ -86,6 +88,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   for the current constants-helper baseline.
 - See `docs/plans/2026-06-09-traveller-task-input-normalization.md` for the
   task input normalization contract.
+- See `docs/plans/2026-06-09-traveller-backup-policy.md` for the manifest
+  backup policy contract.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

@@ -52,6 +52,13 @@ require_absent "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" 
   "distributionUrl=http\\://services.gradle.org" \
   "Gradle wrapper distribution must not use HTTP."
 
+require_contains "traveller-android-app/traveller/src/main/AndroidManifest.xml" \
+  'android:allowBackup="false"' \
+  "Traveller must disable Android backups for local Parse state."
+require_absent "traveller-android-app/traveller/src/main/AndroidManifest.xml" \
+  'android:allowBackup="true"' \
+  "Traveller must not allow Android backups."
+
 if [ ! -x "$ROOT_DIR/traveller-android-app/gradlew" ]; then
   printf '%s\n' "Gradle wrapper must be executable." >&2
   exit 1

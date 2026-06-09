@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-09
+
+- Disabled Android backup for the Traveller app and added an SDK-free manifest
+  contract so local Parse state is not backed up by default.
+
 ## 2026-06-08
 
 - Added a repository changelog and expanded the documented Traveller Android

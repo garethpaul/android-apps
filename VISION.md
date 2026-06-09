@@ -21,6 +21,7 @@ Priority:
 - Keep Parse credentials out of git through `Constants.java.example`
 - Maintain SDK-free baseline checks for quick verification
 - Keep Traveller item creation from persisting empty-looking task records
+- Keep local Traveller Parse state out of Android backups by default
 - Make old Gradle, Android plugin, and build-tools requirements explicit
 
 Next priorities:
