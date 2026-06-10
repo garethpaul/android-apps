@@ -59,6 +59,46 @@ require_absent "traveller-android-app/traveller/src/main/AndroidManifest.xml" \
   'android:allowBackup="true"' \
   "Traveller must not allow Android backups."
 
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  "requireParseConfiguration();" \
+  "Traveller must validate local Parse configuration before initialization."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  "super.onCreate();" \
+  "Traveller Application startup must call the superclass lifecycle method."
+if ! awk '
+  /super\.onCreate\(\);/ { super_line = NR }
+  /requireParseConfiguration\(\);/ && !guard_line { guard_line = NR }
+  /Parse\.initialize\(/ { parse_line = NR }
+  END { exit !(super_line && guard_line && parse_line && super_line < guard_line && guard_line < parse_line) }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java"; then
+  printf '%s\n' "Traveller startup must call super, validate configuration, then initialize Parse." >&2
+  exit 1
+fi
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  'APPLICATION_ID_PLACEHOLDER = "parse-application-id"' \
+  "Traveller must keep the Parse application-id placeholder explicit."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  'CLIENT_KEY_PLACEHOLDER = "parse-client-key"' \
+  "Traveller must keep the Parse client-key placeholder explicit."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  "value.trim().length() > 0" \
+  "Traveller must reject blank Parse configuration values."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  '!placeholder.equals(value.trim())' \
+  "Traveller must reject unchanged Parse placeholder values."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  "Traveller Parse configuration is missing" \
+  "Traveller must fail with a non-secret configuration diagnostic."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  '" + Constants.' \
+  "Traveller configuration diagnostics must not append Parse credential values."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  'Constants.api_key +' \
+  "Traveller configuration diagnostics must not prefix text with the Parse application id."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  'Constants.client_id +' \
+  "Traveller configuration diagnostics must not prefix text with the Parse client key."
+
 if [ ! -x "$ROOT_DIR/traveller-android-app/gradlew" ]; then
   printf '%s\n' "Gradle wrapper must be executable." >&2
   exit 1
@@ -220,11 +260,20 @@ require_contains ".github/workflows/check.yml" \
   "timeout-minutes: 5" \
   "GitHub Actions workflow must have a bounded timeout."
 require_contains ".github/workflows/check.yml" \
+  "runs-on: ubuntu-24.04" \
+  "GitHub Actions workflow must use a fixed Ubuntu runner image."
+require_contains ".github/workflows/check.yml" \
+  "cancel-in-progress: true" \
+  "GitHub Actions workflow must cancel superseded runs."
+require_contains ".github/workflows/check.yml" \
   "workflow_dispatch:" \
   "GitHub Actions workflow must support manual dispatch."
 require_contains ".github/workflows/check.yml" \
   "make check" \
   "GitHub Actions workflow must run make check."
+require_contains "Makefile" \
+  'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
+  "Makefile must resolve repository paths from its own location."
 
 require_contains "traveller-android-app/traveller/lint.xml" \
   "GradleDependency" \

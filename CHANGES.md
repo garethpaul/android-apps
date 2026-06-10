@@ -2,6 +2,12 @@
 
 ## 2026-06-10
 
+- Added a fail-fast Traveller guard that rejects blank or unchanged Parse
+  placeholders before SDK initialization without logging credential values.
+- Restored the superclass `Application.onCreate()` call before Traveller
+  configuration and Parse startup.
+- Made root verification location-independent and pinned CI to Ubuntu 24.04
+  with superseded-run cancellation.
 - Added pinned, read-only GitHub Actions CI that runs the root `make check`
   Traveller baseline with a bounded timeout and manual dispatch.
 

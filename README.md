@@ -69,7 +69,8 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 - GitHub Actions runs the same root `make check` gate through
   `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
-  pinned checkout, read-only permissions, and a five-minute timeout.
+  pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
+  superseded-run cancellation, and a five-minute timeout.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -78,6 +79,11 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 - Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
 - Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
+- Traveller fails before `Parse.initialize` when either local Parse value is
+  blank or still matches the checked-in template placeholder. The diagnostic
+  never includes configured credential values.
+- Traveller preserves the Android `Application` lifecycle by calling
+  `super.onCreate()` before configuration validation and Parse initialization.
 - Traveller trims task descriptions and rejects whitespace-only entries before
   saving Parse `Item` records.
 - Traveller treats a missing task input view as an empty description so stale
