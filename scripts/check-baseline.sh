@@ -184,6 +184,10 @@ if [ ! -f "$ROOT_DIR/CHANGES.md" ]; then
   printf '%s\n' "CHANGES.md is missing." >&2
   exit 1
 fi
+if [ ! -f "$ROOT_DIR/.github/workflows/check.yml" ]; then
+  printf '%s\n' "GitHub Actions check workflow is missing." >&2
+  exit 1
+fi
 
 require_contains "Makefile" \
   "scripts/check-baseline.sh" \
@@ -203,6 +207,24 @@ require_contains "Makefile" \
 require_contains "docs/plans/2026-06-08-traveller-constants-helper.md" \
   "make check" \
   "Traveller constants helper plan must record make check verification."
+require_contains ".github/workflows/check.yml" \
+  "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
+  "GitHub Actions workflow must pin checkout to an immutable revision."
+require_contains ".github/workflows/check.yml" \
+  "permissions:" \
+  "GitHub Actions workflow must declare permissions."
+require_contains ".github/workflows/check.yml" \
+  "contents: read" \
+  "GitHub Actions workflow permissions must be read-only."
+require_contains ".github/workflows/check.yml" \
+  "timeout-minutes: 5" \
+  "GitHub Actions workflow must have a bounded timeout."
+require_contains ".github/workflows/check.yml" \
+  "workflow_dispatch:" \
+  "GitHub Actions workflow must support manual dispatch."
+require_contains ".github/workflows/check.yml" \
+  "make check" \
+  "GitHub Actions workflow must run make check."
 
 require_contains "traveller-android-app/traveller/lint.xml" \
   "GradleDependency" \
@@ -221,6 +243,10 @@ require_contains "README.md" "make test" \
   "README must document the make test gate."
 require_contains "README.md" "make build" \
   "README must document the make build gate."
+require_contains "README.md" "GitHub Actions" \
+  "README must document the GitHub Actions baseline."
+require_contains "README.md" ".github/workflows/check.yml" \
+  "README must document the GitHub Actions workflow path."
 require_contains "README.md" "./gradlew lint --no-daemon" \
   "README must document Gradle lint verification."
 require_contains "README.md" "./gradlew check --no-daemon" \
@@ -251,6 +277,12 @@ require_contains "docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup
 require_contains "docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md" \
   "make check" \
   "Traveller nested editor metadata cleanup plan must document make check verification."
+require_contains "docs/plans/2026-06-10-ci-baseline.md" \
+  "Status: Completed" \
+  "Traveller CI baseline plan must be completed."
+require_contains "docs/plans/2026-06-10-ci-baseline.md" \
+  "scripts/check-baseline.sh" \
+  "Traveller CI baseline plan must document the active baseline checker."
 require_contains "docs/plans/2026-06-09-traveller-item-row-rendering-guards.md" \
   "Status: Completed" \
   "Traveller item row rendering guard plan must be completed."
@@ -263,5 +295,13 @@ require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md"
 require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md" \
   "make check" \
   "Traveller item toggle position guard plan must document make check verification."
+require_contains "VISION.md" "GitHub Actions" \
+  "VISION must document the GitHub Actions baseline."
+require_contains "VISION.md" "make check" \
+  "VISION must document the CI make check gate."
+require_contains "CHANGES.md" "GitHub Actions" \
+  "CHANGES must record the GitHub Actions baseline."
+require_contains "CHANGES.md" "make check" \
+  "CHANGES must record the CI make check gate."
 
 printf '%s\n' "Traveller Android baseline checks passed."

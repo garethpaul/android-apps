@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-10
+
+- Added pinned, read-only GitHub Actions CI that runs the root `make check`
+  Traveller baseline with a bounded timeout and manual dispatch.
+
 ## 2026-06-09
 
 - Guarded Traveller item toggles when list-click positions fall outside the

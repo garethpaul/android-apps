@@ -32,6 +32,7 @@ Priority:
 - Keep IDE workspace metadata out of the shared Traveller project baseline
 - Keep nested Android Studio metadata out of the shared Traveller project
   baseline
+- Keep GitHub Actions running the root `make check` baseline
 - Make old Gradle, Android plugin, and build-tools requirements explicit
 
 Next priorities:

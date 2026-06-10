@@ -12,6 +12,7 @@ This README is based on the checked-in source, manifests, scripts, and repositor
 ## Repository Contents
 
 - `README.md` - project overview and local usage notes
+- `.github/workflows/check.yml` - CI baseline that runs the root Make gate
 - `docs` - source or example code
 - `scripts` - source or example code
 - `SECURITY.md` - security reporting and disclosure guidance
@@ -66,6 +67,9 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 - The baseline check also protects source-level contracts for Traveller row
   inflation, Parse subclass registration, and task input normalization.
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
+- GitHub Actions runs the same root `make check` gate through
+  `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
+  pinned checkout, read-only permissions, and a five-minute timeout.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -125,6 +129,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   local editor metadata ignore contract.
 - See `docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md` for
   nested Android Studio metadata cleanup.
+- See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight CI baseline.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 
