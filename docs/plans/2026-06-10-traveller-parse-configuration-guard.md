@@ -22,10 +22,13 @@ blank values or the checked-in local configuration placeholders.
 
 - Add explicit application-id and client-key placeholder constants to `App`.
 - Restore the superclass lifecycle call before configuration validation.
-- Add a small shared value validator and fail with `IllegalStateException`
+- Add a small shared value normalizer and fail with `IllegalStateException`
   before Parse initialization when configuration is incomplete.
-- Extend `scripts/check-baseline.sh` with configuration, rooted `Makefile`, and
-  CI runner/concurrency contracts.
+- Pass the normalized values to Parse so accepted whitespace does not produce
+  a different runtime credential.
+- Add `scripts/check-automation.py` for configuration, workflow, and mutation
+  contracts while keeping the historical shell baseline focused on repository
+  invariants.
 - Resolve Make paths from the Makefile location and pin GitHub Actions to
   Ubuntu 24.04.
 

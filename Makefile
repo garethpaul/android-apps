@@ -8,6 +8,7 @@ check: verify
 lint:
 	sh -n $(ROOT)scripts/check-baseline.sh
 	sh -n $(ROOT)scripts/prepare-traveller-constants.sh
+	python3 $(ROOT)scripts/check-automation.py
 	$(ROOT)scripts/check-baseline.sh
 
 test:

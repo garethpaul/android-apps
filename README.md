@@ -12,7 +12,7 @@
 
 `garethpaul/android-apps` is an Android application or sample. Personal Android Apps
 
-This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project language mix found during review was: Java (4), shell (1).
+This README is based on the checked-in source, manifests, scripts, and repository metadata on the `master` branch. The project uses Java for the Android app, shell for baseline checks, and Python for automation policy checks.
 
 ## Repository Contents
 
@@ -36,6 +36,7 @@ Additional scan context:
 ### Prerequisites
 
 - Git
+- Python 3
 - Android Studio or a compatible Android SDK
 - Gradle or the checked-in Gradle wrapper when present
 
@@ -64,16 +65,17 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 ## Testing and Verification
 
-- `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
+- `make lint` - checks shell syntax, Python automation policy, and the SDK-free Traveller baseline
 - `make test` - runs the SDK-free Traveller baseline checks
 - `make build` - attempts the legacy Traveller Gradle debug build when Android SDK configuration and local constants are present; otherwise it reports a skip
 - `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
+- `scripts/check-automation.py` - validates hosted workflow policy and source safety contracts
 - The baseline check also protects source-level contracts for Traveller row
   inflation, Parse subclass registration, and task input normalization.
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
 - GitHub Actions runs the same root `make check` gate through
-  `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
+  `.github/workflows/check.yml` on pushes to `master`, pull requests, and manual runs with
   pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
   superseded-run cancellation, and a five-minute timeout.
 
