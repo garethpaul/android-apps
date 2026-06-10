@@ -57,9 +57,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             t.setDescription(description);
             t.setCompleted(false);
             t.saveEventually();
+            if(mAdapter != null){
+                mAdapter.add(t);
+            }
             mTaskInput.setText("");
-            finish();
-            startActivity(getIntent());
         }
 
     }
@@ -157,7 +158,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             taskDescription.setPaintFlags(taskDescription.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
         task.saveEventually();
-        finish();
-        startActivity(getIntent());
+        if(task.isCompleted()){
+            mAdapter.remove(task);
+        }else{
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }

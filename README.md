@@ -92,6 +92,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   view, or row text view is unavailable or malformed.
 - Traveller ignores item toggle events whose adapter position is outside the
   current list bounds.
+- Traveller updates task rows in place after queued Parse saves instead of
+  finishing and restarting the activity for each create or toggle action.
 - Traveller row rendering tolerates missing items, missing descriptions, and
   malformed row text views without crashing the list adapter.
 - Traveller disables Android backup in the checked-in manifest so local Parse

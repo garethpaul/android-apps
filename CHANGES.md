@@ -36,6 +36,8 @@
   contract so local Parse state is not backed up by default.
 - Made Traveller Parse query failures visible through a localized toast and
   added a baseline contract so task loading errors are not silently ignored.
+- Replaced activity restarts after task creates and toggles with in-place
+  adapter updates while Parse persistence remains queued.
 
 ## 2026-06-08
 

@@ -140,6 +140,18 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "t.setDescription(description);" \
   "Traveller task creation must persist the normalized description."
 require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "finish();" \
+  "Traveller task mutations must not tear down the activity."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "startActivity(getIntent());" \
+  "Traveller task mutations must not restart the activity."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "mAdapter.add(t);" \
+  "Traveller task creation must update the current adapter in place."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "mAdapter.remove(task);" \
+  "Traveller completed tasks must be removed from the current adapter in place."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "if(tasks != null)" \
   "Traveller task loading must not ignore Parse query errors."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
@@ -344,6 +356,12 @@ require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md"
 require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md" \
   "make check" \
   "Traveller item toggle position guard plan must document make check verification."
+require_contains "docs/plans/2026-06-10-traveller-in-place-task-updates.md" \
+  "Status: Completed" \
+  "Traveller in-place task update plan must be completed."
+require_contains "docs/plans/2026-06-10-traveller-in-place-task-updates.md" \
+  "make check" \
+  "Traveller in-place task update plan must document make check verification."
 require_contains "VISION.md" "GitHub Actions" \
   "VISION must document the GitHub Actions baseline."
 require_contains "VISION.md" "make check" \
