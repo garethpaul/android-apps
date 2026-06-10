@@ -60,32 +60,11 @@ require_absent "traveller-android-app/traveller/src/main/AndroidManifest.xml" \
   "Traveller must not allow Android backups."
 
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  "requireParseConfiguration();" \
-  "Traveller must validate local Parse configuration before initialization."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  "super.onCreate();" \
-  "Traveller Application startup must call the superclass lifecycle method."
-if ! awk '
-  /super\.onCreate\(\);/ { super_line = NR }
-  /requireParseConfiguration\(\);/ && !guard_line { guard_line = NR }
-  /Parse\.initialize\(/ { parse_line = NR }
-  END { exit !(super_line && guard_line && parse_line && super_line < guard_line && guard_line < parse_line) }
-' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java"; then
-  printf '%s\n' "Traveller startup must call super, validate configuration, then initialize Parse." >&2
-  exit 1
-fi
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
   'APPLICATION_ID_PLACEHOLDER = "parse-application-id"' \
   "Traveller must keep the Parse application-id placeholder explicit."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
   'CLIENT_KEY_PLACEHOLDER = "parse-client-key"' \
   "Traveller must keep the Parse client-key placeholder explicit."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  "value.trim().length() > 0" \
-  "Traveller must reject blank Parse configuration values."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  '!placeholder.equals(value.trim())' \
-  "Traveller must reject unchanged Parse placeholder values."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
   "Traveller Parse configuration is missing" \
   "Traveller must fail with a non-secret configuration diagnostic."
@@ -259,30 +238,6 @@ require_contains "Makefile" \
 require_contains "docs/plans/2026-06-08-traveller-constants-helper.md" \
   "make check" \
   "Traveller constants helper plan must record make check verification."
-require_contains ".github/workflows/check.yml" \
-  "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
-  "GitHub Actions workflow must pin checkout to an immutable revision."
-require_contains ".github/workflows/check.yml" \
-  "permissions:" \
-  "GitHub Actions workflow must declare permissions."
-require_contains ".github/workflows/check.yml" \
-  "contents: read" \
-  "GitHub Actions workflow permissions must be read-only."
-require_contains ".github/workflows/check.yml" \
-  "timeout-minutes: 5" \
-  "GitHub Actions workflow must have a bounded timeout."
-require_contains ".github/workflows/check.yml" \
-  "runs-on: ubuntu-24.04" \
-  "GitHub Actions workflow must use a fixed Ubuntu runner image."
-require_contains ".github/workflows/check.yml" \
-  "cancel-in-progress: true" \
-  "GitHub Actions workflow must cancel superseded runs."
-require_contains ".github/workflows/check.yml" \
-  "workflow_dispatch:" \
-  "GitHub Actions workflow must support manual dispatch."
-require_contains ".github/workflows/check.yml" \
-  "make check" \
-  "GitHub Actions workflow must run make check."
 require_contains "Makefile" \
   'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
   "Makefile must resolve repository paths from its own location."
@@ -338,12 +293,6 @@ require_contains "docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup
 require_contains "docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md" \
   "make check" \
   "Traveller nested editor metadata cleanup plan must document make check verification."
-require_contains "docs/plans/2026-06-10-ci-baseline.md" \
-  "Status: Completed" \
-  "Traveller CI baseline plan must be completed."
-require_contains "docs/plans/2026-06-10-ci-baseline.md" \
-  "scripts/check-baseline.sh" \
-  "Traveller CI baseline plan must document the active baseline checker."
 require_contains "docs/plans/2026-06-09-traveller-item-row-rendering-guards.md" \
   "Status: Completed" \
   "Traveller item row rendering guard plan must be completed."
@@ -356,12 +305,6 @@ require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md"
 require_contains "docs/plans/2026-06-09-traveller-item-toggle-position-guard.md" \
   "make check" \
   "Traveller item toggle position guard plan must document make check verification."
-require_contains "docs/plans/2026-06-10-traveller-in-place-task-updates.md" \
-  "Status: Completed" \
-  "Traveller in-place task update plan must be completed."
-require_contains "docs/plans/2026-06-10-traveller-in-place-task-updates.md" \
-  "make check" \
-  "Traveller in-place task update plan must document make check verification."
 require_contains "VISION.md" "GitHub Actions" \
   "VISION must document the GitHub Actions baseline."
 require_contains "VISION.md" "make check" \

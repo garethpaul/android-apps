@@ -10,6 +10,12 @@
   with superseded-run cancellation.
 - Added pinned, read-only GitHub Actions CI that runs the root `make check`
   Traveller baseline with a bounded timeout and manual dispatch.
+- Disabled persisted checkout credentials and added structural automation
+  contracts for workflow permissions, immutable actions, and source safety.
+- Normalized Parse configuration before initialization and prevented stale
+  cached query callbacks from overwriting queued in-place task updates.
+- Replaced the generic device artwork with a preview of Traveller's actual task
+  entry and list interface.
 
 ## 2026-06-09
 

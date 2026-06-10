@@ -17,6 +17,7 @@ import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private EditText mTaskInput;
     private ListView mListView;
     private ItemAdapter mAdapter;
+    private int mMutationGeneration;
+    private int mPendingMutations;
 
 
 
@@ -56,7 +59,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             Item t = new Item();
             t.setDescription(description);
             t.setCompleted(false);
-            t.saveEventually();
+            mMutationGeneration++;
+            mPendingMutations++;
+            t.saveEventually(new SaveCallback() {
+                @Override
+                public void done(ParseException error) {
+                    mutationFinished();
+                }
+            });
             if(mAdapter != null){
                 mAdapter.add(t);
             }
@@ -75,18 +85,36 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return mTaskInput.getText().toString().trim();
     }
 
+    private void mutationFinished(){
+        if(mPendingMutations > 0){
+            mPendingMutations--;
+        }
+        if(mPendingMutations == 0){
+            mMutationGeneration++;
+            updateData(ParseQuery.CachePolicy.NETWORK_ONLY);
+        }
+    }
+
 
 
 
     public void updateData(){
+        updateData(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+    }
+
+    private void updateData(ParseQuery.CachePolicy cachePolicy){
+        final int queryGeneration = mMutationGeneration;
         ParseQuery<Item> query = ParseQuery.getQuery(Item.class);
         query.whereNotEqualTo("completed", true);
 
-        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
+        query.setCachePolicy(cachePolicy);
         query.findInBackground(new FindCallback<Item>() {
 
             @Override
             public void done(List<Item> tasks, ParseException error) {
+                if(queryGeneration != mMutationGeneration){
+                    return;
+                }
                 if(error == null && tasks != null){
                     mAdapter.clear();
                     mAdapter.addAll(tasks);
@@ -157,7 +185,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }else{
             taskDescription.setPaintFlags(taskDescription.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-        task.saveEventually();
+        mMutationGeneration++;
+        mPendingMutations++;
+        task.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException error) {
+                mutationFinished();
+            }
+        });
         if(task.isCompleted()){
             mAdapter.remove(task);
         }else{

@@ -16,21 +16,22 @@ public class App extends Application {
     public void onCreate()
     {
         super.onCreate();
-        requireParseConfiguration();
-        Parse.initialize(this, Constants.api_key, Constants.client_id);
+        String applicationId = configuredValue(Constants.api_key, APPLICATION_ID_PLACEHOLDER);
+        String clientKey = configuredValue(Constants.client_id, CLIENT_KEY_PLACEHOLDER);
+        Parse.initialize(this, applicationId, clientKey);
     }
 
-    private static void requireParseConfiguration(){
-        if(!isConfigured(Constants.api_key, APPLICATION_ID_PLACEHOLDER) ||
-                !isConfigured(Constants.client_id, CLIENT_KEY_PLACEHOLDER)){
+    private static String configuredValue(String value, String placeholder){
+        if(value == null){
             throw new IllegalStateException(
                     "Traveller Parse configuration is missing; replace Constants.java placeholders locally.");
         }
-    }
 
-    private static boolean isConfigured(String value, String placeholder){
-        return value != null &&
-                value.trim().length() > 0 &&
-                !placeholder.equals(value.trim());
+        String configuredValue = value.trim();
+        if(configuredValue.length() == 0 || placeholder.equals(configuredValue)){
+            throw new IllegalStateException(
+                    "Traveller Parse configuration is missing; replace Constants.java placeholders locally.");
+        }
+        return configuredValue;
     }
 }

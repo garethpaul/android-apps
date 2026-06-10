@@ -11,7 +11,7 @@ the nested Gradle build when the SDK or local constants are unavailable.
 
 ## Completed Scope
 
-- Added a GitHub Actions workflow for pushes, pull requests, and manual runs.
+- Added a GitHub Actions workflow for pushes to `master`, pull requests, and manual runs.
 - Pinned checkout to an immutable revision, limited permissions to repository
   reads, and bounded the job to five minutes.
 - Configured CI to run `make check`, which exercises the SDK-free Traveller
