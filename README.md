@@ -61,7 +61,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
 - `make test` - runs the SDK-free Traveller baseline checks
-- `make build` - attempts the legacy Traveller Gradle debug build when Android SDK configuration and local constants are present; otherwise it reports a skip
+- `make build` - runs legacy Traveller Android lint and debug APK assembly when Android SDK configuration and local constants are present; otherwise it reports a skip
 - `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - The baseline check also protects source-level contracts for Traveller row
@@ -100,6 +100,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   state is not included in platform backups by default.
 - Traveller shows a localized error toast when Parse task loading fails instead
   of silently leaving stale or empty list state.
+- Traveller refreshes incomplete items when `MainActivity` starts and ignores
+  callbacks after the activity stops or a newer refresh supersedes them.
 - Local IDE metadata stays ignored, including nested Android Studio project
   metadata, so editor workspace files do not become part of the shared
   Traveller baseline.
@@ -138,6 +140,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-09-traveller-nested-editor-metadata-cleanup.md` for
   nested Android Studio metadata cleanup.
 - See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight CI baseline.
+- See `docs/plans/2026-06-12-traveller-query-lifecycle.md` for visible-lifecycle
+  refreshes and stale Parse callback suppression.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

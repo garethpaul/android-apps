@@ -160,6 +160,45 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "R.string.load_items_error" \
   "Traveller task loading failures must use a localized error message."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "private boolean mStarted;" \
+  "Traveller must track whether MainActivity is started."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "private int mDataGeneration;" \
+  "Traveller must track Parse query generations."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "final int dataGeneration = ++mDataGeneration;" \
+  "Traveller refreshes must capture a new query generation."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "if(!mStarted || dataGeneration != mDataGeneration || mAdapter == null)" \
+  "Traveller callbacks must reject stopped, stale, or adapter-less results."
+if ! awk '
+  /protected void onStart\(\)/ { on_start = NR }
+  /mStarted = true;/ { started = NR }
+  /updateData\(\);/ { refresh = NR }
+  /protected void onStop\(\)/ { on_stop = NR }
+  /mStarted = false;/ { stopped = NR }
+  /mDataGeneration\+\+;/ { invalidated = NR }
+  /super\.onStop\(\);/ { super_stop = NR }
+  /if\(!mStarted \|\| dataGeneration != mDataGeneration \|\| mAdapter == null\)/ { guard = NR }
+  /if\(error == null && tasks != null\)/ { apply_result = NR }
+  /Toast\.makeText\(/ { toast = NR }
+  END {
+    exit !(on_start && started && refresh && on_start < started && started < refresh &&
+      on_stop && stopped && invalidated && super_stop && on_stop < stopped &&
+      stopped < invalidated && invalidated < super_stop && guard && apply_result &&
+      toast && guard < apply_result && guard < toast)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller lifecycle and stale-query guards must run before UI updates." >&2
+  exit 1
+fi
+refresh_call_count=$(grep -Fc "updateData();" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$refresh_call_count" -ne 1 ]; then
+  printf '%s\n' "Traveller must start exactly one visible-lifecycle refresh path." >&2
+  exit 1
+fi
 require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
   '<string name="load_items_error">Unable to load traveller items.</string>' \
   "Traveller task loading error string is missing."
@@ -286,6 +325,9 @@ require_contains ".github/workflows/check.yml" \
 require_contains "Makefile" \
   'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
   "Makefile must resolve repository paths from its own location."
+require_contains "Makefile" \
+  './gradlew lint assembleDebug --no-daemon' \
+  "SDK-backed make build must run Android lint before assembling the debug APK."
 
 require_contains "traveller-android-app/traveller/lint.xml" \
   "GradleDependency" \
@@ -362,6 +404,12 @@ require_contains "docs/plans/2026-06-10-traveller-in-place-task-updates.md" \
 require_contains "docs/plans/2026-06-10-traveller-in-place-task-updates.md" \
   "make check" \
   "Traveller in-place task update plan must document make check verification."
+require_contains "docs/plans/2026-06-12-traveller-query-lifecycle.md" \
+  "Status: Completed" \
+  "Traveller query lifecycle plan must be completed."
+require_contains "docs/plans/2026-06-12-traveller-query-lifecycle.md" \
+  "make check" \
+  "Traveller query lifecycle plan must document make check verification."
 require_contains "VISION.md" "GitHub Actions" \
   "VISION must document the GitHub Actions baseline."
 require_contains "VISION.md" "make check" \

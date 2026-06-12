@@ -26,6 +26,8 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private EditText mTaskInput;
     private ListView mListView;
     private ItemAdapter mAdapter;
+    private boolean mStarted;
+    private int mDataGeneration;
 
 
 
@@ -43,7 +45,20 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mStarted = true;
         updateData();
+    }
+
+    @Override
+    protected void onStop() {
+        mStarted = false;
+        mDataGeneration++;
+        super.onStop();
     }
 
 
@@ -79,6 +94,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
 
     public void updateData(){
+        final int dataGeneration = ++mDataGeneration;
         ParseQuery<Item> query = ParseQuery.getQuery(Item.class);
         query.whereNotEqualTo("completed", true);
 
@@ -87,6 +103,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
             @Override
             public void done(List<Item> tasks, ParseException error) {
+                if(!mStarted || dataGeneration != mDataGeneration || mAdapter == null){
+                    return;
+                }
+
                 if(error == null && tasks != null){
                     mAdapter.clear();
                     mAdapter.addAll(tasks);

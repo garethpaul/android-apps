@@ -1,5 +1,15 @@
 # Changes
 
+## 2026-06-12
+
+- Moved Traveller item refreshes into the visible activity lifecycle.
+- Added query generations so callbacks from stopped or superseded Parse
+  refreshes cannot mutate the adapter or show stale errors.
+- Extended the SDK-free baseline and documentation with lifecycle ordering
+  contracts.
+- Strengthened the SDK-backed `make build` gate to run Android lint before
+  assembling the debug APK.
+
 ## 2026-06-10
 
 - Added a fail-fast Traveller guard that rejects blank or unchanged Parse

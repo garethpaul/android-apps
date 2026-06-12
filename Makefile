@@ -19,7 +19,7 @@ build:
 	elif [ ! -f "$(TRAVELLER_CONSTANTS)" ]; then \
 		echo "Traveller Constants.java not configured; skipping Traveller Gradle build"; \
 	else \
-		cd $(ROOT)traveller-android-app && ./gradlew assembleDebug --no-daemon; \
+		cd $(ROOT)traveller-android-app && ./gradlew lint assembleDebug --no-daemon; \
 	fi
 
 verify: lint test build
