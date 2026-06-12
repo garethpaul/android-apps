@@ -31,6 +31,7 @@ Priority:
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
   backend internals
+- Keep stopped or superseded Parse query callbacks from mutating Traveller UI
 - Keep IDE workspace metadata out of the shared Traveller project baseline
 - Keep nested Android Studio metadata out of the shared Traveller project
   baseline

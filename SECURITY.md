@@ -35,6 +35,8 @@ Helpful reports include:
   settings, and editor preferences are not committed.
 - Traveller row rendering should tolerate malformed local row data and stale
   layouts without crashing before the user can recover.
+- Parse query callbacks should not mutate UI or display errors after the
+  activity stops, and superseded refresh generations should be ignored.
 
 ## Mobile Privacy Notes
 
