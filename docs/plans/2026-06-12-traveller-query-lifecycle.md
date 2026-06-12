@@ -40,10 +40,12 @@ Files: `traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/
 
 ### Static Regression Contracts
 
-Files: `scripts/check-baseline.sh`
+Files: `Makefile`, `scripts/check-baseline.sh`
 
 - Require the active-state field, generation field, start/stop transitions,
   captured generation, and callback guard ordering.
+- Require the SDK-backed build target to run Android lint before debug APK
+  assembly.
 - Require this completed plan and its `make check` verification note.
 
 ### Documentation
@@ -66,9 +68,11 @@ Files: `README.md`, `SECURITY.md`, `VISION.md`, `CHANGES.md`
 
 ## Verification
 
-- `make lint`
-- `make test`
-- `make build`
-- `make check`
-- Static mutation checks for lifecycle and generation guard ordering
-- `git diff --check`
+- `make check` passed with Amazon Corretto 8, the configured Android SDK, and
+  ignored placeholder `Constants.java` generated from the checked-in example.
+- Gradle compiled debug and release Java sources, reported zero Android lint
+  issues, and assembled the debug APK.
+- The SDK-free baseline passed and rejected mutations that removed started
+  state, generation capture, stop-time invalidation, callback ordering, the
+  combined Gradle lint/build command, or completed-plan evidence.
+- `git diff --check` passed.

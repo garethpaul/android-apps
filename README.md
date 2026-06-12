@@ -61,7 +61,7 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 - `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
 - `make test` - runs the SDK-free Traveller baseline checks
-- `make build` - attempts the legacy Traveller Gradle debug build when Android SDK configuration and local constants are present; otherwise it reports a skip
+- `make build` - runs legacy Traveller Android lint and debug APK assembly when Android SDK configuration and local constants are present; otherwise it reports a skip
 - `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - The baseline check also protects source-level contracts for Traveller row

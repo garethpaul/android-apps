@@ -325,6 +325,9 @@ require_contains ".github/workflows/check.yml" \
 require_contains "Makefile" \
   'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
   "Makefile must resolve repository paths from its own location."
+require_contains "Makefile" \
+  './gradlew lint assembleDebug --no-daemon' \
+  "SDK-backed make build must run Android lint before assembling the debug APK."
 
 require_contains "traveller-android-app/traveller/lint.xml" \
   "GradleDependency" \
