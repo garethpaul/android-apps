@@ -1,6 +1,6 @@
 # Traveller Optimistic Query Invalidation
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -65,3 +65,19 @@ diff/artifact/secret scans, and exact-head hosted verification.
 - Run `git diff --check`, generated-artifact inspection, and credential-shaped
   added-line scans before committing implementation paths.
 - Record hosted evidence only after querying the exact pushed head.
+
+## Verification
+
+- The focused checker initially reached only the expected incomplete-plan
+  assertion after implementation and documentation were added.
+- Eight focused hostile mutations were rejected: removed and reordered create
+  invalidation, removed and reordered toggle invalidation, weakened callback
+  generation guard, extra generation increment, security-guidance rollback,
+  and completed-plan rollback.
+- Local and isolated external-directory `make check` passed shell syntax and
+  every SDK-free contract; both truthfully skipped Gradle because no Android
+  SDK is configured in these worktrees.
+- The isolated copy used its own temporary Git index because the checker
+  intentionally inspects tracked files.
+- `git diff --check`, generated-artifact inspection, and credential-shaped
+  added-line scans passed. Hosted exact-head evidence remains pending push.

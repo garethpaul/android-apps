@@ -104,6 +104,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   restoring prior completion state before a guarded refresh.
 - Traveller refreshes incomplete items when `MainActivity` starts and ignores
   callbacks after the activity stops or a newer refresh supersedes them.
+- Traveller optimistic mutations invalidate stale Parse query callbacks before
+  adding a new row or applying a completion toggle.
 - Local IDE metadata stays ignored, including nested Android Studio project
   metadata, so editor workspace files do not become part of the shared
   Traveller baseline.
@@ -146,6 +148,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   refreshes and stale Parse callback suppression.
 - See `docs/plans/2026-06-13-traveller-save-failure-reconciliation.md` for
   optimistic task save failures and adapter rollback.
+- See `docs/plans/2026-06-13-traveller-optimistic-query-invalidation.md` for
+  local mutation ordering and stale query suppression.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

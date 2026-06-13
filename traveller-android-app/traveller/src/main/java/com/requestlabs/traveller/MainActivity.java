@@ -69,6 +69,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void createTask(View v) {
         String description = normalizedTaskDescription();
         if (description.length() > 0){
+            mDataGeneration++;
             Item t = new Item();
             t.setDescription(description);
             t.setCompleted(false);
@@ -190,6 +191,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             return;
         }
 
+        mDataGeneration++;
         final boolean previousCompleted = task.isCompleted();
         task.setCompleted(!previousCompleted);
 
