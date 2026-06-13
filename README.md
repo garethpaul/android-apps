@@ -100,6 +100,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   state is not included in platform backups by default.
 - Traveller shows a localized error toast when Parse task loading fails instead
   of silently leaving stale or empty list state.
+- Traveller reconciles optimistic task save failures by removing unsaved rows or
+  restoring prior completion state before a guarded refresh.
 - Traveller refreshes incomplete items when `MainActivity` starts and ignores
   callbacks after the activity stops or a newer refresh supersedes them.
 - Local IDE metadata stays ignored, including nested Android Studio project
@@ -142,6 +144,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `docs/plans/2026-06-10-ci-baseline.md` for the lightweight CI baseline.
 - See `docs/plans/2026-06-12-traveller-query-lifecycle.md` for visible-lifecycle
   refreshes and stale Parse callback suppression.
+- See `docs/plans/2026-06-13-traveller-save-failure-reconciliation.md` for
+  optimistic task save failures and adapter rollback.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `VISION.md` for project direction and contribution guardrails.
 

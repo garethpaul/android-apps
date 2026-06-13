@@ -195,13 +195,118 @@ if ! awk '
 fi
 refresh_call_count=$(grep -Fc "updateData();" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
-if [ "$refresh_call_count" -ne 1 ]; then
+if [ "$refresh_call_count" -ne 3 ]; then
+  printf '%s\n' "Traveller must keep one lifecycle refresh and two save-failure refreshes." >&2
+  exit 1
+fi
+if ! awk '
+  /protected void onStart\(\)/ { in_start = 1 }
+  /protected void onStop\(\)/ { in_start = 0 }
+  in_start && /updateData\(\);/ { refreshes++ }
+  END { exit !(refreshes == 1) }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
   printf '%s\n' "Traveller must start exactly one visible-lifecycle refresh path." >&2
   exit 1
 fi
 require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
   '<string name="load_items_error">Unable to load traveller items.</string>' \
   "Traveller task loading error string is missing."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "import com.parse.SaveCallback;" \
+  "Traveller task saves must use the vendored Parse SaveCallback API."
+save_callback_count=$(grep -Fc "saveEventually(new SaveCallback()" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$save_callback_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must attach exactly two callbacks to creation and toggle saves." >&2
+  exit 1
+fi
+if ! awk '
+  /mAdapter\.add\(t\);/ && !create_add { create_add = NR }
+  /saveNewTask\(t\);/ { create_save = NR }
+  /if\(task\.isCompleted\(\)\)/ && !toggle_branch { toggle_branch = NR }
+  /saveTaskCompletion\(task, previousCompleted\);/ { toggle_save = NR }
+  END {
+    exit !(create_add && create_save && create_add < create_save &&
+      toggle_branch && toggle_save && toggle_branch < toggle_save)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must update optimistic adapter state before queuing save callbacks." >&2
+  exit 1
+fi
+for save_contract in \
+  "saveNewTask(final Item task)" \
+  "saveTaskCompletion(final Item task, final boolean previousCompleted)" \
+  "if(error == null)" \
+  "if(!mStarted || mAdapter == null)" \
+  "mAdapter.remove(task);" \
+  "task.setCompleted(previousCompleted);" \
+  "mAdapter.getPosition(task) < 0" \
+  "mAdapter.notifyDataSetChanged();" \
+  "showSaveFailure();" \
+  "updateData();"; do
+  require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+    "$save_contract" \
+    "Traveller save failure reconciliation must keep contract: $save_contract"
+done
+if ! awk '
+  /private void saveNewTask\(final Item task\)/ { in_create = 1 }
+  /private String normalizedTaskDescription\(\)/ { in_create = 0 }
+  in_create && /if\(error == null\)/ { create_error = NR }
+  in_create && /if\(!mStarted \|\| mAdapter == null\)/ { create_lifecycle = NR }
+  in_create && /mAdapter\.remove\(task\);/ { create_remove = NR }
+  in_create && /mAdapter\.notifyDataSetChanged\(\);/ { create_notify = NR }
+  in_create && /showSaveFailure\(\);/ { create_toast = NR }
+  in_create && /updateData\(\);/ { create_refresh = NR }
+
+  /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
+  /private void showSaveFailure\(\)/ { in_toggle = 0 }
+  in_toggle && /if\(error == null\)/ { toggle_error = NR }
+  in_toggle && /task\.setCompleted\(previousCompleted\);/ { toggle_restore = NR }
+  in_toggle && /if\(!mStarted \|\| mAdapter == null\)/ { toggle_lifecycle = NR }
+  in_toggle && /if\(previousCompleted\)/ { toggle_branch = NR }
+  in_toggle && /mAdapter\.remove\(task\);/ { toggle_remove = NR }
+  in_toggle && /mAdapter\.getPosition\(task\) < 0/ { toggle_position = NR }
+  in_toggle && /mAdapter\.notifyDataSetChanged\(\);/ { toggle_notify = NR }
+  in_toggle && /showSaveFailure\(\);/ { toggle_toast = NR }
+  in_toggle && /updateData\(\);/ { toggle_refresh = NR }
+  END {
+    create_ok = create_error && create_lifecycle && create_remove && create_notify &&
+      create_toast && create_refresh && create_error < create_lifecycle &&
+      create_lifecycle < create_remove && create_remove < create_notify &&
+      create_notify < create_toast && create_toast < create_refresh
+    toggle_ok = toggle_error && toggle_restore && toggle_lifecycle && toggle_branch && toggle_remove &&
+      toggle_position && toggle_notify && toggle_toast && toggle_refresh &&
+      toggle_error < toggle_restore && toggle_restore < toggle_lifecycle &&
+      toggle_lifecycle < toggle_branch && toggle_branch < toggle_remove &&
+      toggle_remove < toggle_position &&
+      toggle_position < toggle_notify && toggle_notify < toggle_toast &&
+      toggle_toast < toggle_refresh
+    exit !(create_ok && toggle_ok)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller save callbacks must guard, roll back, notify, report, and refresh in order." >&2
+  exit 1
+fi
+require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
+  '<string name="save_item_error">Unable to save traveller item.</string>' \
+  "Traveller task save failure string is missing."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "R.string.save_item_error" \
+  "Traveller task save failures must use the localized generic resource."
+for save_doc in "README.md" "SECURITY.md" "CHANGES.md"; do
+  require_contains "$save_doc" \
+    "optimistic task save failures" \
+    "$save_doc must document optimistic task save failures."
+done
+require_contains "docs/plans/2026-06-13-traveller-save-failure-reconciliation.md" \
+  "Status: Completed" \
+  "Traveller save failure reconciliation plan must be completed."
+require_contains "docs/plans/2026-06-13-traveller-save-failure-reconciliation.md" \
+  "make check" \
+  "Traveller save failure reconciliation plan must record make check."
+require_contains "docs/plans/2026-06-13-traveller-save-failure-reconciliation.md" \
+  "hostile mutations" \
+  "Traveller save failure reconciliation plan must record hostile mutations."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "if(mAdapter == null)" \
   "Traveller item toggles must guard missing adapters."

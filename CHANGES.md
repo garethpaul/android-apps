@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-13
+
+- Added callbacks for optimistic task save failures so unsaved new rows are
+  removed and failed completion toggles restore their prior state.
+- Added lifecycle-gated localized errors, guarded refresh reconciliation, and
+  SDK-free regression contracts for both save paths.
+
 ## 2026-06-12
 
 - Moved Traveller item refreshes into the visible activity lifecycle.
