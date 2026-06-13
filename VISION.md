@@ -33,6 +33,8 @@ Priority:
   backend internals
 - Keep stopped or superseded Parse query callbacks from mutating Traveller UI
 - Invalidate stale Parse query callbacks before optimistic adapter changes
+- Reject save callbacks from earlier visible lifecycles before adapter
+  reconciliation
 - Keep IDE workspace metadata out of the shared Traveller project baseline
 - Keep nested Android Studio metadata out of the shared Traveller project
   baseline

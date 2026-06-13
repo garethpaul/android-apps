@@ -28,6 +28,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private ListView mListView;
     private ItemAdapter mAdapter;
     private boolean mStarted;
+    private int mLifecycleGeneration;
     private int mDataGeneration;
 
 
@@ -52,12 +53,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     protected void onStart() {
         super.onStart();
         mStarted = true;
+        mLifecycleGeneration++;
         updateData();
     }
 
     @Override
     protected void onStop() {
         mStarted = false;
+        mLifecycleGeneration++;
         mDataGeneration++;
         super.onStop();
     }
@@ -83,13 +86,14 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     private void saveNewTask(final Item task){
+        final int lifecycleGeneration = mLifecycleGeneration;
         task.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException error) {
                 if(error == null){
                     return;
                 }
-                if(!mStarted || mAdapter == null){
+                if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
                     return;
                 }
 
@@ -209,6 +213,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     private void saveTaskCompletion(final Item task, final boolean previousCompleted){
+        final int lifecycleGeneration = mLifecycleGeneration;
         task.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException error) {
@@ -216,11 +221,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     return;
                 }
 
-                task.setCompleted(previousCompleted);
-                if(!mStarted || mAdapter == null){
+                if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
                     return;
                 }
 
+                task.setCompleted(previousCompleted);
                 if(previousCompleted){
                     mAdapter.remove(task);
                 }else if(mAdapter.getPosition(task) < 0){

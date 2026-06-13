@@ -1,6 +1,6 @@
 # Traveller Save Callback Lifecycle
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -72,4 +72,16 @@ credential, and exact-head hosted checks.
 
 ## Verification
 
-- Pending implementation.
+- Local and external-working-directory `make check` passed shell syntax and all
+  SDK-free source, ordering, documentation, and repository contracts.
+- Twelve isolated hostile mutations were rejected across lifecycle state,
+  start/stop increment presence and ordering, both save capture presence and
+  ordering, callback equality, rollback ordering, guidance, and completed-plan
+  status.
+- Java 8 is available, but no Android SDK is configured or present in the
+  standard local paths, so Gradle lint, Java compilation, unit tests, and debug
+  assembly were truthfully skipped locally and remain required in hosted CI.
+- Final diff, artifact, conflict-marker, credential-pattern, and whitespace
+  inspection passed. Emulator, physical-device, and live Parse backend behavior
+  were not exercised.
+- Hosted exact-head evidence remains pending push.

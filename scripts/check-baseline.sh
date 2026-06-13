@@ -264,7 +264,7 @@ for save_contract in \
   "saveNewTask(final Item task)" \
   "saveTaskCompletion(final Item task, final boolean previousCompleted)" \
   "if(error == null)" \
-  "if(!mStarted || mAdapter == null)" \
+  "if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null)" \
   "mAdapter.remove(task);" \
   "task.setCompleted(previousCompleted);" \
   "mAdapter.getPosition(task) < 0" \
@@ -275,11 +275,67 @@ for save_contract in \
     "$save_contract" \
     "Traveller save failure reconciliation must keep contract: $save_contract"
 done
+lifecycle_capture_count=$(grep -Fc "final int lifecycleGeneration = mLifecycleGeneration;" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$lifecycle_capture_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must capture the lifecycle generation for both save callbacks." >&2
+  exit 1
+fi
+save_lifecycle_guard_count=$(grep -Fc \
+  "if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null)" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$save_lifecycle_guard_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must reject both stale-lifecycle save callbacks." >&2
+  exit 1
+fi
+lifecycle_increment_count=$(grep -Fc "mLifecycleGeneration++;" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$lifecycle_increment_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must advance lifecycle generation on start and stop." >&2
+  exit 1
+fi
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "private int mLifecycleGeneration;" \
+  "Traveller must track visible lifecycle generations independently."
+if ! awk '
+  /protected void onStart\(\)/ { in_start = 1 }
+  /protected void onStop\(\)/ { in_start = 0; in_stop = 1 }
+  /public void createTask\(View v\)/ { in_stop = 0 }
+  in_start && /mStarted = true;/ { start_state = NR }
+  in_start && /mLifecycleGeneration\+\+;/ { start_generation = NR }
+  in_stop && /mStarted = false;/ { stop_state = NR }
+  in_stop && /mLifecycleGeneration\+\+;/ { stop_generation = NR }
+  END {
+    exit !(start_state && start_generation && start_state < start_generation &&
+      stop_state && stop_generation && stop_state < stop_generation)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must advance lifecycle generation after start and stop state changes." >&2
+  exit 1
+fi
+if ! awk '
+  /private void saveNewTask\(final Item task\)/ { in_create = 1 }
+  /private String normalizedTaskDescription\(\)/ { in_create = 0 }
+  in_create && /final int lifecycleGeneration = mLifecycleGeneration;/ { create_capture = NR }
+  in_create && /task\.saveEventually\(new SaveCallback\(\)/ { create_save = NR }
+
+  /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
+  /private void showSaveFailure\(\)/ { in_toggle = 0 }
+  in_toggle && /final int lifecycleGeneration = mLifecycleGeneration;/ { toggle_capture = NR }
+  in_toggle && /task\.saveEventually\(new SaveCallback\(\)/ { toggle_save = NR }
+  END {
+    exit !(create_capture && create_save && create_capture < create_save &&
+      toggle_capture && toggle_save && toggle_capture < toggle_save)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must capture lifecycle generations before queuing both saves." >&2
+  exit 1
+fi
 if ! awk '
   /private void saveNewTask\(final Item task\)/ { in_create = 1 }
   /private String normalizedTaskDescription\(\)/ { in_create = 0 }
   in_create && /if\(error == null\)/ { create_error = NR }
-  in_create && /if\(!mStarted \|\| mAdapter == null\)/ { create_lifecycle = NR }
+  in_create && /lifecycleGeneration != mLifecycleGeneration/ { create_lifecycle = NR }
   in_create && /mAdapter\.remove\(task\);/ { create_remove = NR }
   in_create && /mAdapter\.notifyDataSetChanged\(\);/ { create_notify = NR }
   in_create && /showSaveFailure\(\);/ { create_toast = NR }
@@ -288,8 +344,8 @@ if ! awk '
   /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
   /private void showSaveFailure\(\)/ { in_toggle = 0 }
   in_toggle && /if\(error == null\)/ { toggle_error = NR }
+  in_toggle && /lifecycleGeneration != mLifecycleGeneration/ { toggle_lifecycle = NR }
   in_toggle && /task\.setCompleted\(previousCompleted\);/ { toggle_restore = NR }
-  in_toggle && /if\(!mStarted \|\| mAdapter == null\)/ { toggle_lifecycle = NR }
   in_toggle && /if\(previousCompleted\)/ { toggle_branch = NR }
   in_toggle && /mAdapter\.remove\(task\);/ { toggle_remove = NR }
   in_toggle && /mAdapter\.getPosition\(task\) < 0/ { toggle_position = NR }
@@ -303,8 +359,8 @@ if ! awk '
       create_notify < create_toast && create_toast < create_refresh
     toggle_ok = toggle_error && toggle_restore && toggle_lifecycle && toggle_branch && toggle_remove &&
       toggle_position && toggle_notify && toggle_toast && toggle_refresh &&
-      toggle_error < toggle_restore && toggle_restore < toggle_lifecycle &&
-      toggle_lifecycle < toggle_branch && toggle_branch < toggle_remove &&
+      toggle_error < toggle_lifecycle && toggle_lifecycle < toggle_restore &&
+      toggle_restore < toggle_branch && toggle_branch < toggle_remove &&
       toggle_remove < toggle_position &&
       toggle_position < toggle_notify && toggle_notify < toggle_toast &&
       toggle_toast < toggle_refresh
@@ -314,6 +370,22 @@ if ! awk '
   printf '%s\n' "Traveller save callbacks must guard, roll back, notify, report, and refresh in order." >&2
   exit 1
 fi
+for lifecycle_doc_contract in \
+  "README.md|stale save callbacks from earlier visible lifecycles" \
+  "SECURITY.md|stale save callbacks from earlier visible lifecycles" \
+  "VISION.md|save callbacks from earlier visible lifecycles" \
+  "CHANGES.md|stale save callbacks from earlier visible lifecycles"; do
+  lifecycle_doc=${lifecycle_doc_contract%%|*}
+  lifecycle_contract=${lifecycle_doc_contract#*|}
+  require_contains "$lifecycle_doc" "$lifecycle_contract" \
+    "$lifecycle_doc must document save callback lifecycle guards."
+done
+require_contains "docs/plans/2026-06-13-traveller-save-callback-lifecycle.md" \
+  "Status: Completed" \
+  "Traveller save callback lifecycle plan must be completed."
+require_contains "docs/plans/2026-06-13-traveller-save-callback-lifecycle.md" \
+  "hostile mutations" \
+  "Traveller save callback lifecycle plan must record hostile mutations."
 require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
   '<string name="save_item_error">Unable to save traveller item.</string>' \
   "Traveller task save failure string is missing."
