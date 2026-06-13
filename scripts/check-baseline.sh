@@ -169,6 +169,33 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "final int dataGeneration = ++mDataGeneration;" \
   "Traveller refreshes must capture a new query generation."
+generation_increment_count=$(grep -Eo '\+\+mDataGeneration|mDataGeneration\+\+' \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" | wc -l | tr -d ' ')
+if [ "$generation_increment_count" -ne 4 ]; then
+  printf '%s\n' "Traveller must keep create, toggle, refresh, and stop generation invalidation." >&2
+  exit 1
+fi
+if ! awk '
+  /public void createTask\(View v\)/ { in_create = 1 }
+  /private void saveNewTask\(final Item task\)/ { in_create = 0 }
+  in_create && /mDataGeneration\+\+;/ { create_invalidate = NR }
+  in_create && /mAdapter\.add\(t\);/ { create_add = NR }
+  in_create && /saveNewTask\(t\);/ { create_save = NR }
+  /public void onItemClick\(/ { in_toggle = 1 }
+  /private void saveTaskCompletion\(/ { in_toggle = 0 }
+  in_toggle && /mDataGeneration\+\+;/ { toggle_invalidate = NR }
+  in_toggle && /task\.setCompleted\(!previousCompleted\);/ { toggle_mutate = NR }
+  in_toggle && /saveTaskCompletion\(task, previousCompleted\);/ { toggle_save = NR }
+  END {
+    exit !(create_invalidate && create_add && create_save &&
+      create_invalidate < create_add && create_add < create_save &&
+      toggle_invalidate && toggle_mutate && toggle_save &&
+      toggle_invalidate < toggle_mutate && toggle_mutate < toggle_save)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must invalidate stale queries before optimistic create and toggle mutations." >&2
+  exit 1
+fi
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "if(!mStarted || dataGeneration != mDataGeneration || mAdapter == null)" \
   "Traveller callbacks must reject stopped, stale, or adapter-less results."
@@ -176,10 +203,10 @@ if ! awk '
   /protected void onStart\(\)/ { on_start = NR }
   /mStarted = true;/ { started = NR }
   /updateData\(\);/ { refresh = NR }
-  /protected void onStop\(\)/ { on_stop = NR }
+  /protected void onStop\(\)/ { on_stop = NR; in_stop = 1 }
   /mStarted = false;/ { stopped = NR }
-  /mDataGeneration\+\+;/ { invalidated = NR }
-  /super\.onStop\(\);/ { super_stop = NR }
+  in_stop && /mDataGeneration\+\+;/ { invalidated = NR }
+  /super\.onStop\(\);/ { super_stop = NR; in_stop = 0 }
   /if\(!mStarted \|\| dataGeneration != mDataGeneration \|\| mAdapter == null\)/ { guard = NR }
   /if\(error == null && tasks != null\)/ { apply_result = NR }
   /Toast\.makeText\(/ { toast = NR }
@@ -307,6 +334,20 @@ require_contains "docs/plans/2026-06-13-traveller-save-failure-reconciliation.md
 require_contains "docs/plans/2026-06-13-traveller-save-failure-reconciliation.md" \
   "hostile mutations" \
   "Traveller save failure reconciliation plan must record hostile mutations."
+require_contains "docs/plans/2026-06-13-traveller-optimistic-query-invalidation.md" \
+  "Status: Completed" \
+  "Traveller optimistic query invalidation plan must be completed."
+require_contains "docs/plans/2026-06-13-traveller-optimistic-query-invalidation.md" \
+  "make check" \
+  "Traveller optimistic query invalidation plan must record make check."
+require_contains "docs/plans/2026-06-13-traveller-optimistic-query-invalidation.md" \
+  "hostile mutations" \
+  "Traveller optimistic query invalidation plan must record hostile mutations."
+for optimistic_doc in "README.md" "SECURITY.md" "VISION.md" "CHANGES.md"; do
+  require_contains "$optimistic_doc" \
+    "stale Parse query callbacks" \
+    "$optimistic_doc must document optimistic stale-query invalidation."
+done
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "if(mAdapter == null)" \
   "Traveller item toggles must guard missing adapters."

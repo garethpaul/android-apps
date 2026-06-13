@@ -6,6 +6,9 @@
   removed and failed completion toggles restore their prior state.
 - Added lifecycle-gated localized errors, guarded refresh reconciliation, and
   SDK-free regression contracts for both save paths.
+- Invalidated stale Parse query callbacks before optimistic creates and toggles
+  so older query snapshots cannot overwrite the current adapter action.
+- Added mutation-sensitive generation-order contracts and guidance.
 
 ## 2026-06-12
 
