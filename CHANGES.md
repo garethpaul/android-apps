@@ -9,6 +9,8 @@
 - Invalidated stale Parse query callbacks before optimistic creates and toggles
   so older query snapshots cannot overwrite the current adapter action.
 - Added mutation-sensitive generation-order contracts and guidance.
+- Rejected stale save callbacks from earlier visible lifecycles before they can
+  reconcile against a newly resumed adapter.
 
 ## 2026-06-12
 

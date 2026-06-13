@@ -46,6 +46,8 @@
 - Traveller trims task descriptions and rejects whitespace-only entries before saving Parse `Item` records.
 - Traveller treats a missing task input view as an empty description so stale layouts do not crash task creation.
 - Traveller ignores item toggle events when the adapter, selected item, row view, or row text view is unavailable or malformed.
+- Parse save callbacks must match the current visible lifecycle generation
+  before adapter rollback, feedback, or refresh work.
 
 ## Agent workflow
 

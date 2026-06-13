@@ -43,6 +43,8 @@ Helpful reports include:
 - The app treats optimistic task save failures by restoring or removing local
   adapter state only while the activity is visible, using generic localized
   errors, and refreshing from Parse without exposing backend details.
+- Lifecycle generations reject stale save callbacks from earlier visible lifecycles
+  before they can mutate a newly resumed adapter.
 
 ## Mobile Privacy Notes
 
