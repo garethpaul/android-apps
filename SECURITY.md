@@ -37,6 +37,9 @@ Helpful reports include:
   layouts without crashing before the user can recover.
 - Parse query callbacks should not mutate UI or display errors after the
   activity stops, and superseded refresh generations should be ignored.
+- The app treats optimistic task save failures by restoring or removing local
+  adapter state only while the activity is visible, using generic localized
+  errors, and refreshing from Parse without exposing backend details.
 
 ## Mobile Privacy Notes
 

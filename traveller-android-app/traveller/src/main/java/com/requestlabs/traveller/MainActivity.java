@@ -17,6 +17,7 @@ import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,13 +72,32 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             Item t = new Item();
             t.setDescription(description);
             t.setCompleted(false);
-            t.saveEventually();
             if(mAdapter != null){
                 mAdapter.add(t);
             }
+            saveNewTask(t);
             mTaskInput.setText("");
         }
 
+    }
+
+    private void saveNewTask(final Item task){
+        task.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException error) {
+                if(error == null){
+                    return;
+                }
+                if(!mStarted || mAdapter == null){
+                    return;
+                }
+
+                mAdapter.remove(task);
+                mAdapter.notifyDataSetChanged();
+                showSaveFailure();
+                updateData();
+            }
+        });
     }
 
     //
@@ -170,18 +190,51 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             return;
         }
 
-        task.setCompleted(!task.isCompleted());
+        final boolean previousCompleted = task.isCompleted();
+        task.setCompleted(!previousCompleted);
 
         if(task.isCompleted()){
             taskDescription.setPaintFlags(taskDescription.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }else{
             taskDescription.setPaintFlags(taskDescription.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-        task.saveEventually();
         if(task.isCompleted()){
             mAdapter.remove(task);
         }else{
             mAdapter.notifyDataSetChanged();
         }
+        saveTaskCompletion(task, previousCompleted);
+    }
+
+    private void saveTaskCompletion(final Item task, final boolean previousCompleted){
+        task.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException error) {
+                if(error == null){
+                    return;
+                }
+
+                task.setCompleted(previousCompleted);
+                if(!mStarted || mAdapter == null){
+                    return;
+                }
+
+                if(previousCompleted){
+                    mAdapter.remove(task);
+                }else if(mAdapter.getPosition(task) < 0){
+                    mAdapter.add(task);
+                }
+                mAdapter.notifyDataSetChanged();
+                showSaveFailure();
+                updateData();
+            }
+        });
+    }
+
+    private void showSaveFailure(){
+        Toast.makeText(
+                MainActivity.this,
+                R.string.save_item_error,
+                Toast.LENGTH_SHORT).show();
     }
 }
