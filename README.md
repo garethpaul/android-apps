@@ -106,6 +106,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   they can roll back or refresh a newly resumed adapter.
 - Traveller accepts only the latest save callback for each task identity, so an
   older same-item failure cannot undo a newer optimistic save.
+- Traveller ignores save failures whose data generation was superseded by a
+  later query or optimistic mutation before adapter reconciliation.
 - Traveller refreshes incomplete items when `MainActivity` starts and ignores
   callbacks after the activity stops or a newer refresh supersedes them.
 - Traveller optimistic mutations invalidate stale Parse query callbacks before

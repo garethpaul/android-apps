@@ -457,6 +457,59 @@ require_contains "docs/plans/2026-06-14-traveller-per-task-save-generation.md" \
 require_contains "docs/plans/2026-06-14-traveller-per-task-save-generation.md" \
   "mutations" \
   "Traveller per-task save generation plan must record mutation evidence."
+data_generation_capture_count=$(grep -Fc "final int dataGeneration = mDataGeneration;" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$data_generation_capture_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must capture the data generation for both save paths." >&2
+  exit 1
+fi
+data_generation_guard_count=$(grep -Fc "if(dataGeneration != mDataGeneration){" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$data_generation_guard_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must reject superseded data generations in both save paths." >&2
+  exit 1
+fi
+if ! awk '
+  /private void saveNewTask\(final Item task\)/ { in_create = 1 }
+  /private String normalizedTaskDescription\(\)/ { in_create = 0 }
+  in_create && /finishCurrentTaskSave\(task, saveGeneration\)/ { create_save_guard = NR }
+  in_create && /dataGeneration != mDataGeneration/ { create_data_guard = NR }
+  in_create && /mAdapter.remove\(task\)/ { create_reconcile = NR }
+
+  /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
+  /private int beginTaskSave\(Item task\)/ { in_toggle = 0 }
+  in_toggle && /finishCurrentTaskSave\(task, saveGeneration\)/ { toggle_save_guard = NR }
+  in_toggle && /dataGeneration != mDataGeneration/ { toggle_data_guard = NR }
+  in_toggle && /task.setCompleted\(previousCompleted\)/ { toggle_reconcile = NR }
+  END {
+    exit !(create_save_guard && create_data_guard && create_reconcile &&
+      create_save_guard < create_data_guard && create_data_guard < create_reconcile &&
+      toggle_save_guard && toggle_data_guard && toggle_reconcile &&
+      toggle_save_guard < toggle_data_guard && toggle_data_guard < toggle_reconcile)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must reject superseded data generations before save-failure reconciliation." >&2
+  exit 1
+fi
+for save_data_doc_contract in \
+  "README.md|save failures whose data generation was superseded" \
+  "SECURITY.md|Data generations reject superseded save failures" \
+  "VISION.md|Reject superseded save-failure data generations" \
+  "CHANGES.md|data-generation ownership to optimistic save failures"; do
+  save_data_doc=${save_data_doc_contract%%|*}
+  save_data_text=${save_data_doc_contract#*|}
+  require_contains "$save_data_doc" "$save_data_text" \
+    "$save_data_doc must document save callback data-generation ownership."
+done
+require_contains "docs/plans/2026-06-14-traveller-save-callback-data-generation.md" \
+  "Status: Completed" \
+  "Traveller save callback data-generation plan must be completed."
+require_contains "docs/plans/2026-06-14-traveller-save-callback-data-generation.md" \
+  "make check" \
+  "Traveller save callback data-generation plan must record make check."
+require_contains "docs/plans/2026-06-14-traveller-save-callback-data-generation.md" \
+  "mutations" \
+  "Traveller save callback data-generation plan must record mutation evidence."
 require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
   '<string name="save_item_error">Unable to save traveller item.</string>' \
   "Traveller task save failure string is missing."

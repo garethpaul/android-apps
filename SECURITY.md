@@ -47,6 +47,8 @@ Helpful reports include:
   before they can mutate a newly resumed adapter.
 - Per-task save generations reject older same-item callbacks before success or
   failure reconciliation while preserving independent task saves.
+- Data generations reject superseded save failures before they can remove,
+  restore, re-add, notify, or refresh against newer adapter state.
 
 ## Mobile Privacy Notes
 

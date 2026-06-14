@@ -13,6 +13,8 @@
   reconcile against a newly resumed adapter.
 - Added per-task save generations so late same-item callbacks cannot reconcile
   over a newer optimistic save in the same visible lifecycle.
+- Added data-generation ownership to optimistic save failures so callbacks from
+  superseded adapter state cannot remove or restore stale task objects.
 
 ## 2026-06-12
 

@@ -1,6 +1,6 @@
 # Bind Traveller Save Failures to Data Generations
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -57,12 +57,14 @@ Describe data-generation ownership as part of optimistic save-failure safety.
 
 ## Verification
 
-- Run root and external-working-directory `make check`.
-- Reject focused mutations that remove either capture or guard, move a guard
-  after adapter reconciliation, weaken documentation, or leave this plan
-  incomplete.
-- Audit the exact diff, generated artifacts, credentials, conflict markers,
-  and whitespace before committing implementation.
+Completed on 2026-06-14:
+
+- Root and external-working-directory `make check` both passed the shell syntax
+  and portable Traveller baseline checks; the legacy Gradle build was
+  truthfully skipped because no Android SDK was configured.
+- Six focused mutations were rejected when they removed a capture or guard,
+  moved reconciliation before the guard, removed documentation contracts, or
+  reopened this plan.
 
 ## Risks
 

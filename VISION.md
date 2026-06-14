@@ -36,6 +36,7 @@ Priority:
 - Reject save callbacks from earlier visible lifecycles before adapter
   reconciliation
 - Reject older same-item save callbacks before reconciling newer optimistic state
+- Reject superseded save-failure data generations before adapter reconciliation
 - Keep IDE workspace metadata out of the shared Traveller project baseline
 - Keep nested Android Studio metadata out of the shared Traveller project
   baseline
