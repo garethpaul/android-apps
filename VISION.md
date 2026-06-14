@@ -35,6 +35,7 @@ Priority:
 - Invalidate stale Parse query callbacks before optimistic adapter changes
 - Reject save callbacks from earlier visible lifecycles before adapter
   reconciliation
+- Reject older same-item save callbacks before reconciling newer optimistic state
 - Keep IDE workspace metadata out of the shared Traveller project baseline
 - Keep nested Android Studio metadata out of the shared Traveller project
   baseline

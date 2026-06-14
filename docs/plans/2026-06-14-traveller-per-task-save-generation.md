@@ -1,6 +1,6 @@
 # Traveller Per-Task Save Generation
 
-Status: Planned
+Status: Completed
 
 ## Context
 
@@ -54,14 +54,18 @@ lifecycle suppression.
 
 ## Verification
 
-Planned:
+Completed on 2026-06-14:
 
-- Run the SDK-free baseline and full configured Android `make check` gate.
-- Reject focused mutations that replace identity storage, remove generation
-  checks, move checks after success handling, remove stop cleanup or security
-  wording, or revert plan status.
-- Audit the exact diff, generated artifacts, whitespace, and credential-shaped
-  additions before committing.
+- The SDK-free checker recognized per-task identity storage, both generation
+  captures and callback guards, pre-error ordering, stop cleanup, and project
+  documentation, failing only while this plan was intentionally planned.
+- Configured `make check` passed shell syntax and the SDK-free baseline twice;
+  the Android build was truthfully skipped because the untracked local
+  `Constants.java` credential/configuration file is absent.
+- Seven isolated mutations were rejected when they replaced identity storage,
+  removed generation capture or callback ownership, moved the guard after
+  success handling, removed stop cleanup or security wording, or changed this
+  plan back to `Status: Planned`.
 
 ## Risks
 

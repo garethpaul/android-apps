@@ -397,6 +397,66 @@ require_contains "docs/plans/2026-06-13-traveller-save-callback-lifecycle.md" \
 require_contains "docs/plans/2026-06-13-traveller-save-callback-lifecycle.md" \
   "hostile mutations" \
   "Traveller save callback lifecycle plan must record hostile mutations."
+for task_save_contract in \
+  "new IdentityHashMap<Item, Integer>()" \
+  "final int saveGeneration = beginTaskSave(task);" \
+  "if(!finishCurrentTaskSave(task, saveGeneration))" \
+  "mSaveGenerations.clear();" \
+  "mSaveGenerations.put(task, saveGeneration);" \
+  "mSaveGenerations.remove(task);"; do
+  require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+    "$task_save_contract" \
+    "Traveller per-task save generations must keep contract: $task_save_contract"
+done
+task_save_capture_count=$(grep -Fc "final int saveGeneration = beginTaskSave(task);" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$task_save_capture_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must capture a per-task generation for both save paths." >&2
+  exit 1
+fi
+task_save_guard_count=$(grep -Fc "if(!finishCurrentTaskSave(task, saveGeneration))" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$task_save_guard_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must reject stale same-item callbacks in both save paths." >&2
+  exit 1
+fi
+if ! awk '
+  /private void saveNewTask\(final Item task\)/ { in_create = 1 }
+  /private String normalizedTaskDescription\(\)/ { in_create = 0 }
+  in_create && /finishCurrentTaskSave\(task, saveGeneration\)/ { create_generation = NR }
+  in_create && /if\(error == null\)/ { create_error = NR }
+
+  /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
+  /private int beginTaskSave\(Item task\)/ { in_toggle = 0 }
+  in_toggle && /finishCurrentTaskSave\(task, saveGeneration\)/ { toggle_generation = NR }
+  in_toggle && /if\(error == null\)/ { toggle_error = NR }
+  END {
+    exit !(create_generation && create_error && create_generation < create_error &&
+      toggle_generation && toggle_error && toggle_generation < toggle_error)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must reject stale same-item callbacks before success or failure handling." >&2
+  exit 1
+fi
+for task_save_doc_contract in \
+  "README.md|latest save callback for each task identity" \
+  "SECURITY.md|Per-task save generations reject older same-item callbacks" \
+  "VISION.md|Reject older same-item save callbacks" \
+  "CHANGES.md|per-task save generations"; do
+  task_save_doc=${task_save_doc_contract%%|*}
+  task_save_text=${task_save_doc_contract#*|}
+  require_contains "$task_save_doc" "$task_save_text" \
+    "$task_save_doc must document per-task save callback ownership."
+done
+require_contains "docs/plans/2026-06-14-traveller-per-task-save-generation.md" \
+  "Status: Completed" \
+  "Traveller per-task save generation plan must be completed."
+require_contains "docs/plans/2026-06-14-traveller-per-task-save-generation.md" \
+  "make check" \
+  "Traveller per-task save generation plan must record make check."
+require_contains "docs/plans/2026-06-14-traveller-per-task-save-generation.md" \
+  "mutations" \
+  "Traveller per-task save generation plan must record mutation evidence."
 require_contains "traveller-android-app/traveller/src/main/res/values/strings.xml" \
   '<string name="save_item_error">Unable to save traveller item.</string>' \
   "Traveller task save failure string is missing."

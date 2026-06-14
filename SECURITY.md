@@ -45,6 +45,8 @@ Helpful reports include:
   errors, and refreshing from Parse without exposing backend details.
 - Lifecycle generations reject stale save callbacks from earlier visible lifecycles
   before they can mutate a newly resumed adapter.
+- Per-task save generations reject older same-item callbacks before success or
+  failure reconciliation while preserving independent task saves.
 
 ## Mobile Privacy Notes
 

@@ -11,6 +11,8 @@
 - Added mutation-sensitive generation-order contracts and guidance.
 - Rejected stale save callbacks from earlier visible lifecycles before they can
   reconcile against a newly resumed adapter.
+- Added per-task save generations so late same-item callbacks cannot reconcile
+  over a newer optimistic save in the same visible lifecycle.
 
 ## 2026-06-12
 

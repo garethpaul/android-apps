@@ -20,7 +20,9 @@ import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
@@ -30,6 +32,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     private boolean mStarted;
     private int mLifecycleGeneration;
     private int mDataGeneration;
+    private int mNextSaveGeneration;
+    private final Map<Item, Integer> mSaveGenerations =
+            new IdentityHashMap<Item, Integer>();
 
 
 
@@ -62,6 +67,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         mStarted = false;
         mLifecycleGeneration++;
         mDataGeneration++;
+        mSaveGenerations.clear();
         super.onStop();
     }
 
@@ -87,9 +93,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void saveNewTask(final Item task){
         final int lifecycleGeneration = mLifecycleGeneration;
+        final int saveGeneration = beginTaskSave(task);
         task.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException error) {
+                if(!finishCurrentTaskSave(task, saveGeneration)){
+                    return;
+                }
                 if(error == null){
                     return;
                 }
@@ -214,9 +224,13 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void saveTaskCompletion(final Item task, final boolean previousCompleted){
         final int lifecycleGeneration = mLifecycleGeneration;
+        final int saveGeneration = beginTaskSave(task);
         task.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException error) {
+                if(!finishCurrentTaskSave(task, saveGeneration)){
+                    return;
+                }
                 if(error == null){
                     return;
                 }
@@ -236,6 +250,21 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 updateData();
             }
         });
+    }
+
+    private int beginTaskSave(Item task){
+        int saveGeneration = ++mNextSaveGeneration;
+        mSaveGenerations.put(task, saveGeneration);
+        return saveGeneration;
+    }
+
+    private boolean finishCurrentTaskSave(Item task, int saveGeneration){
+        Integer currentGeneration = mSaveGenerations.get(task);
+        if(currentGeneration == null || currentGeneration != saveGeneration){
+            return false;
+        }
+        mSaveGenerations.remove(task);
+        return true;
     }
 
     private void showSaveFailure(){
