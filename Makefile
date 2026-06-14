@@ -1,6 +1,6 @@
 .PHONY: build check lint test verify
 
-ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 TRAVELLER_CONSTANTS := $(ROOT)traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java
 
 check: verify
