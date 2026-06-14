@@ -1,6 +1,6 @@
 # Traveller Make Root Override Protection
 
-Status: Planned
+Status: Completed
 
 ## Problem
 
@@ -36,3 +36,28 @@ lookup, and conditional Gradle build away from the reviewed checkout.
 - Do not create placeholder credentials or claim emulator, device, or live
   Parse verification.
 - Do not merge or close any pull request without explicit owner authorization.
+
+## Work Completed
+
+- Protected the Makefile-derived root while preserving all existing targets,
+  skip conditions, constants lookup, and Gradle behavior.
+- Added dependency-free contracts for the exact protected assignment, rooted
+  constants and scripts, rooted Gradle command, and this completed plan.
+
+## Verification Results
+
+- The focused baseline checker and shell syntax checks passed.
+- Local, external-directory, and hostile command-line `ROOT` `make check`
+  gates each passed both baseline executions and shell syntax checks while
+  remaining anchored to this checkout.
+- The Android SDK and ignored local `Constants.java` were absent, so all three
+  gates truthfully reported the designed Gradle-build skip; no SDK-backed
+  compile, lint, emulator, device, or live Parse result is claimed.
+- All nine focused mutations were rejected: missing `override`, `CURDIR`,
+  recursive root assignment, `firstword`, unrooted constants, one unrooted
+  baseline command, unrooted helper, unrooted Gradle command, and reopened plan
+  status.
+- Workflow YAML, Android XML, SVG XML, shell syntax, conflict-marker,
+  whitespace, ignored-artifact, exact-diff, and changed-line credential audits
+  passed; only the three intended files changed and no generated artifacts
+  remained.

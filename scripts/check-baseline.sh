@@ -25,6 +25,17 @@ require_absent() {
   fi
 }
 
+require_exact_line() {
+  file=$1
+  pattern=$2
+  message=$3
+
+  if ! grep -Fxq "$pattern" "$ROOT_DIR/$file"; then
+    printf '%s\n' "$message" >&2
+    exit 1
+  fi
+}
+
 require_contains "traveller-android-app/build.gradle" \
   "com.android.tools.build:gradle:0.8.3" \
   "Android Gradle Plugin must stay pinned to 0.8.3."
@@ -540,12 +551,27 @@ require_contains ".github/workflows/check.yml" \
 require_contains ".github/workflows/check.yml" \
   "make check" \
   "GitHub Actions workflow must run make check."
-require_contains "Makefile" \
-  'ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
-  "Makefile must resolve repository paths from its own location."
-require_contains "Makefile" \
-  './gradlew lint assembleDebug --no-daemon' \
-  "SDK-backed make build must run Android lint before assembling the debug APK."
+require_exact_line "Makefile" \
+  'override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
+  "Makefile must protect repository paths from command-line overrides."
+require_exact_line "Makefile" \
+  'TRAVELLER_CONSTANTS := $(ROOT)traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java' \
+  "Makefile must derive Traveller constants from the protected repository root."
+if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 3 ]; then
+  printf '%s\n' "All three baseline commands must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/prepare-traveller-constants.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The constants helper syntax check must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc 'cd $(ROOT)traveller-android-app && ./gradlew lint assembleDebug --no-daemon' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "SDK-backed make build must run rooted Android lint before assembly." >&2
+  exit 1
+fi
+require_exact_line "docs/plans/2026-06-14-traveller-make-root-override-protection.md" \
+  "Status: Completed" \
+  "Traveller Make root override protection plan must record completed status."
 
 require_contains "traveller-android-app/traveller/lint.xml" \
   "GradleDependency" \
