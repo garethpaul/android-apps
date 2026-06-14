@@ -149,7 +149,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 if(error == null && tasks != null){
                     mAdapter.clear();
                     mAdapter.addAll(tasks);
-                }else{
+                }else if(error == null || error.getCode() != ParseException.CACHE_MISS){
                     Toast.makeText(
                             MainActivity.this,
                             R.string.load_items_error,

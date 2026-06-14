@@ -172,6 +172,41 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "R.string.load_items_error" \
   "Traveller task loading failures must use a localized error message."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);" \
+  "Traveller must retain cache-then-network task loading."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "error.getCode() != ParseException.CACHE_MISS" \
+  "Traveller must suppress the expected intermediate cache-miss callback."
+if ! awk '
+  /public void updateData\(\)/ { in_update = 1 }
+  /public boolean onCreateOptionsMenu/ { in_update = 0 }
+  in_update && /error.getCode\(\) != ParseException.CACHE_MISS/ { cache_guard = NR }
+  in_update && /Toast\.makeText\(/ { toast = NR }
+  END { exit !(cache_guard && toast && cache_guard < toast) }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must suppress cache misses before displaying load errors." >&2
+  exit 1
+fi
+for cache_miss_doc_contract in \
+  "README.md|suppresses the expected cache-miss callback" \
+  "SECURITY.md|Expected Parse cache misses do not display load-failure errors" \
+  "VISION.md|Suppress expected cache-miss errors" \
+  "CHANGES.md|Suppressed expected Parse cache-miss callbacks"; do
+  cache_miss_doc=${cache_miss_doc_contract%%|*}
+  cache_miss_text=${cache_miss_doc_contract#*|}
+  require_contains "$cache_miss_doc" "$cache_miss_text" \
+    "$cache_miss_doc must document cache-miss toast suppression."
+done
+require_contains "docs/plans/2026-06-14-traveller-cache-miss-toast-suppression.md" \
+  "Status: Completed" \
+  "Traveller cache-miss toast suppression plan must be completed."
+require_contains "docs/plans/2026-06-14-traveller-cache-miss-toast-suppression.md" \
+  "make check" \
+  "Traveller cache-miss toast suppression plan must record make check."
+require_contains "docs/plans/2026-06-14-traveller-cache-miss-toast-suppression.md" \
+  "mutations" \
+  "Traveller cache-miss toast suppression plan must record mutation evidence."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "private boolean mStarted;" \
   "Traveller must track whether MainActivity is started."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \

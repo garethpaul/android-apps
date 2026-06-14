@@ -15,6 +15,8 @@
   over a newer optimistic save in the same visible lifecycle.
 - Added data-generation ownership to optimistic save failures so callbacks from
   superseded adapter state cannot remove or restore stale task objects.
+- Suppressed expected Parse cache-miss callbacks while `CACHE_THEN_NETWORK`
+  continues to the backend, preserving toasts for actual load failures.
 
 ## 2026-06-12
 

@@ -98,8 +98,10 @@ When the required SDK or runtime is unavailable, use static checks and source re
   malformed row text views without crashing the list adapter.
 - Traveller disables Android backup in the checked-in manifest so local Parse
   state is not included in platform backups by default.
-- Traveller shows a localized error toast when Parse task loading fails instead
-  of silently leaving stale or empty list state.
+- Traveller suppresses the expected cache-miss callback while
+  `CACHE_THEN_NETWORK` continues to the network. Real Parse task loading
+  failures still show a localized error toast instead of silently leaving
+  stale or empty list state.
 - Traveller reconciles optimistic task save failures by removing unsaved rows or
   restoring prior completion state before a guarded refresh.
 - Traveller ignores stale save callbacks from earlier visible lifecycles before

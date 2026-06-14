@@ -37,6 +37,8 @@ Helpful reports include:
   layouts without crashing before the user can recover.
 - Parse query callbacks should not mutate UI or display errors after the
   activity stops, and superseded refresh generations should be ignored.
+- Expected Parse cache misses do not display load-failure errors while the
+  configured cache-then-network query continues to its network result.
 - Optimistic creates and toggles invalidate stale Parse query callbacks before
   changing adapter state, preventing older server snapshots from undoing the
   user's current visible action.

@@ -31,6 +31,7 @@ Priority:
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
   backend internals
+- Suppress expected cache-miss errors while cache-then-network loading proceeds
 - Keep stopped or superseded Parse query callbacks from mutating Traveller UI
 - Invalidate stale Parse query callbacks before optimistic adapter changes
 - Reject save callbacks from earlier visible lifecycles before adapter
