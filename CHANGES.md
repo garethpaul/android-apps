@@ -17,6 +17,9 @@
   superseded adapter state cannot remove or restore stale task objects.
 - Suppressed expected Parse cache-miss callbacks while `CACHE_THEN_NETWORK`
   continues to the backend, preserving toasts for actual load failures.
+- Added an exact-commit Android device and Parse backend verification matrix for
+  configuration, queries, optimistic saves, concurrency, lifecycle, failures,
+  and privacy-safe evidence, with every runtime row explicitly unexecuted.
 
 ## 2026-06-12
 

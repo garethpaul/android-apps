@@ -43,6 +43,8 @@ Priority:
   baseline
 - Keep GitHub Actions running the root `make check` baseline
 - Make old Gradle, Android plugin, and build-tools requirements explicit
+- Keep exact-commit Android and Parse runtime evidence separate from portable
+  contracts, with unexecuted scenarios recorded explicitly
 
 Next priorities:
 
@@ -53,6 +55,8 @@ Next priorities:
 - Add Android tests once the project runs in an SDK-capable environment
 - Separate reusable sample code from obsolete experiment scaffolding where it
   improves maintainability
+- Execute the Traveller device verification matrix against an authorized test
+  backend with privacy-safe evidence
 
 Contribution rules:
 

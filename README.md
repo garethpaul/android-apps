@@ -74,6 +74,11 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
+Use [`DEVICE_VERIFICATION.md`](DEVICE_VERIFICATION.md) for the exact-commit
+emulator/device and non-production Parse matrix. It covers configuration,
+cache/network queries, optimistic saves, concurrent callbacks, lifecycle,
+offline failures, privacy-safe evidence, and explicit unexecuted rows.
+
 ## Configuration and Secrets
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
@@ -127,6 +132,9 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Review changes touching database, model, or persistence code; examples from the scan include docs/plans/2026-06-08-traveller-android-reproducibility-baseline.md.
 
 ## Maintenance Notes
+
+- See `docs/plans/2026-06-14-traveller-device-verification-checklist.md` for
+  the Android/Parse runtime evidence matrix and non-claims.
 
 - This looks like a legacy Android project or sample. Expect Android SDK, Gradle, and support-library versions to matter.
 - See `CHANGES.md` and `docs/plans/2026-06-08-traveller-constants-helper.md`

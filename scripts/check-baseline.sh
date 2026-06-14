@@ -36,6 +36,48 @@ require_exact_line() {
   fi
 }
 
+for required_path in \
+  "DEVICE_VERIFICATION.md" \
+  "docs/plans/2026-06-14-traveller-device-verification-checklist.md"; do
+  if [ ! -f "$ROOT_DIR/$required_path" ]; then
+    printf '%s\n' "Required file is missing: $required_path" >&2
+    exit 1
+  fi
+done
+
+for device_contract in \
+  'commit SHA and pull request' \
+  'Placeholder constants' \
+  'Cache miss then network' \
+  'Repeated same-task saves' \
+  'Stop during save' \
+  'Process recreation' \
+  'Do not convert `not run` into passing evidence.' \
+  'Parse application IDs, client' \
+  'every Android device and Parse backend row as' \
+  'unexecuted'; do
+  require_contains "DEVICE_VERIFICATION.md" "$device_contract" \
+    "Traveller device checklist must keep contract: $device_contract"
+done
+
+require_contains "README.md" "DEVICE_VERIFICATION.md" \
+  "README must link the Traveller device verification matrix."
+require_contains "README.md" "explicit unexecuted rows" \
+  "README must document the unexecuted device boundary."
+require_contains "VISION.md" "Traveller device verification matrix" \
+  "VISION must retain the device verification follow-up."
+require_contains "CHANGES.md" "every runtime row explicitly unexecuted" \
+  "CHANGES must record the unexecuted runtime matrix."
+
+for plan_contract in \
+  'Status: Completed' \
+  'make check' \
+  'hostile mutations' \
+  'No Android SDK, emulator, physical-device, or live Parse scenario was executed'; do
+  require_contains "docs/plans/2026-06-14-traveller-device-verification-checklist.md" \
+    "$plan_contract" "Traveller device plan must keep completion evidence: $plan_contract"
+done
+
 require_contains "traveller-android-app/build.gradle" \
   "com.android.tools.build:gradle:0.8.3" \
   "Android Gradle Plugin must stay pinned to 0.8.3."
