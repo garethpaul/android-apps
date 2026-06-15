@@ -107,6 +107,8 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
   `CACHE_THEN_NETWORK` continues to the network. Real Parse task loading
   failures still show a localized error toast instead of silently leaving
   stale or empty list state.
+- When `CACHE_THEN_NETWORK` first supplies usable cached results, cached tasks remain visible without a later network-error toast from the same query.
+  Queries that fail before delivering tasks still show the localized error.
 - Traveller reconciles optimistic task save failures by removing unsaved rows or
   restoring prior completion state before a guarded refresh.
 - Traveller ignores stale save callbacks from earlier visible lifecycles before

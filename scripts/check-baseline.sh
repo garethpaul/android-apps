@@ -219,6 +219,18 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "error.getCode() != ParseException.CACHE_MISS" \
   "Traveller must suppress the expected intermediate cache-miss callback."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "private boolean deliveredTasks;" \
+  "Traveller queries must track successful delivery inside each callback."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "deliveredTasks = true;" \
+  "Traveller queries must record a successful task delivery."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "}else if(!deliveredTasks &&" \
+  "Traveller must suppress later query errors after delivering tasks."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  "(error == null || error.getCode() != ParseException.CACHE_MISS))" \
+  "Traveller must keep first-delivery malformed results and non-cache failures visible."
 if ! awk '
   /public void updateData\(\)/ { in_update = 1 }
   /public boolean onCreateOptionsMenu/ { in_update = 0 }
@@ -227,6 +239,23 @@ if ! awk '
   END { exit !(cache_guard && toast && cache_guard < toast) }
 ' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
   printf '%s\n' "Traveller must suppress cache misses before displaying load errors." >&2
+  exit 1
+fi
+if ! awk '
+  /query\.findInBackground\(new FindCallback<Item>\(\)/ { in_callback = 1 }
+  /public boolean onCreateOptionsMenu/ { in_callback = 0 }
+  in_callback && /private boolean deliveredTasks;/ { declaration = NR }
+  in_callback && /mAdapter\.addAll\(tasks\);/ { apply_tasks = NR }
+  in_callback && /deliveredTasks = true;/ { delivered = NR }
+  in_callback && /else if\(!deliveredTasks &&/ { error_guard = NR }
+  in_callback && /Toast\.makeText\(/ { toast = NR }
+  END {
+    exit !(declaration && apply_tasks && delivered && error_guard && toast &&
+      declaration < apply_tasks && apply_tasks < delivered &&
+      delivered < error_guard && error_guard < toast)
+  }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must record callback-local delivery before suppressing later load errors." >&2
   exit 1
 fi
 for cache_miss_doc_contract in \
@@ -248,6 +277,24 @@ require_contains "docs/plans/2026-06-14-traveller-cache-miss-toast-suppression.m
 require_contains "docs/plans/2026-06-14-traveller-cache-miss-toast-suppression.md" \
   "mutations" \
   "Traveller cache-miss toast suppression plan must record mutation evidence."
+for cache_success_doc_contract in \
+  "README.md|cached tasks remain visible without a later network-error toast" \
+  "SECURITY.md|successful cached task delivery suppresses a later network-error toast" \
+  "CHANGES.md|Suppressed later Parse network-error toasts after a successful cached task delivery"; do
+  cache_success_doc=${cache_success_doc_contract%%|*}
+  cache_success_text=${cache_success_doc_contract#*|}
+  require_contains "$cache_success_doc" "$cache_success_text" \
+    "$cache_success_doc must document cached-result error suppression."
+done
+for cache_success_plan_contract in \
+  "Status: Completed" \
+  "make check" \
+  "hostile mutations" \
+  "No emulator, physical-device, or live Parse scenario was executed"; do
+  require_contains "docs/plans/2026-06-15-traveller-cache-success-error-suppression.md" \
+    "$cache_success_plan_contract" \
+    "Traveller cache-success error plan must keep completion evidence: $cache_success_plan_contract"
+done
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "private boolean mStarted;" \
   "Traveller must track whether MainActivity is started."

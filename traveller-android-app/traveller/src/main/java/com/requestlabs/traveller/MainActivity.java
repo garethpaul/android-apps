@@ -139,6 +139,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
         query.findInBackground(new FindCallback<Item>() {
+            private boolean deliveredTasks;
 
             @Override
             public void done(List<Item> tasks, ParseException error) {
@@ -149,7 +150,9 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 if(error == null && tasks != null){
                     mAdapter.clear();
                     mAdapter.addAll(tasks);
-                }else if(error == null || error.getCode() != ParseException.CACHE_MISS){
+                    deliveredTasks = true;
+                }else if(!deliveredTasks &&
+                        (error == null || error.getCode() != ParseException.CACHE_MISS)){
                     Toast.makeText(
                             MainActivity.this,
                             R.string.load_items_error,
