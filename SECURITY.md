@@ -41,6 +41,8 @@ Helpful reports include:
   configured cache-then-network query continues to its network result.
 - A successful cached task delivery suppresses a later network-error toast from the
   same query without hiding failures that occur before any usable result.
+- Keep application-owned Parse subclass registration before SDK initialization
+  so activity recreation cannot alter process-wide model setup.
 - Optimistic creates and toggles invalidate stale Parse query callbacks before
   changing adapter state, preventing older server snapshots from undoing the
   user's current visible action.

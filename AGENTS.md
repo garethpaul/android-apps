@@ -48,6 +48,8 @@
 - Traveller ignores item toggle events when the adapter, selected item, row view, or row text view is unavailable or malformed.
 - Parse save callbacks must match the current visible lifecycle generation
   before adapter rollback, feedback, or refresh work.
+- Keep application-owned Parse subclass registration ahead of SDK
+  initialization; activities must not repeat process-wide model setup.
 
 ## Agent workflow
 

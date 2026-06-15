@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-15
+
+- Moved `Item` to application-owned Parse subclass registration before SDK
+  initialization, preventing activity recreation from repeating global setup.
+- Added mutation-sensitive ownership and initialization-order contracts.
+
 ## 2026-06-13
 
 - Added callbacks for optimistic task save failures so unsaved new rows are

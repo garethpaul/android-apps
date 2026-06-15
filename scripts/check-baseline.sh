@@ -702,12 +702,49 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "if(description == null)" \
   "Traveller item rows must guard missing task descriptions."
 
-register_count=$(grep -Fc "ParseObject.registerSubclass(Item.class)" \
-  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+APP_JAVA="traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java"
+MAIN_ACTIVITY_JAVA="traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"
+
+register_count=$(grep -RFc "ParseObject.registerSubclass(Item.class)" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller" \
+  | awk -F: '{ total += $NF } END { print total + 0 }')
 if [ "$register_count" -ne 1 ]; then
   printf '%s\n' "Item subclass registration should happen exactly once." >&2
   exit 1
 fi
+
+require_contains "$APP_JAVA" \
+  "ParseObject.registerSubclass(Item.class);" \
+  "Item subclass registration must be owned by the application bootstrap."
+require_absent "$MAIN_ACTIVITY_JAVA" \
+  "ParseObject.registerSubclass(Item.class);" \
+  "MainActivity must not repeat process-wide Parse subclass registration."
+
+register_line=$(grep -nF "ParseObject.registerSubclass(Item.class);" \
+  "$ROOT_DIR/$APP_JAVA" | head -n 1 | cut -d: -f1)
+initialize_line=$(grep -nF "Parse.initialize(" \
+  "$ROOT_DIR/$APP_JAVA" | head -n 1 | cut -d: -f1)
+if [ -z "$register_line" ] || [ -z "$initialize_line" ] || \
+   [ "$register_line" -ge "$initialize_line" ]; then
+  printf '%s\n' "Item subclass registration must precede Parse initialization." >&2
+  exit 1
+fi
+
+for parse_registration_doc in "AGENTS.md" "README.md" "SECURITY.md" "VISION.md" "CHANGES.md"; do
+  require_contains "$parse_registration_doc" \
+    "application-owned Parse subclass registration" \
+    "$parse_registration_doc must document Parse subclass bootstrap ownership."
+done
+
+for parse_registration_plan_contract in \
+  "status: completed" \
+  "make check" \
+  "hostile mutations" \
+  "No Android SDK, emulator, physical-device, or live Parse scenario was executed"; do
+  require_contains "docs/plans/2026-06-15-traveller-parse-subclass-bootstrap.md" \
+    "$parse_registration_plan_contract" \
+    "Traveller Parse subclass bootstrap plan must keep completion evidence: $parse_registration_plan_contract"
+done
 
 require_contains "traveller-android-app/.gitignore" \
   "Constants.java" \

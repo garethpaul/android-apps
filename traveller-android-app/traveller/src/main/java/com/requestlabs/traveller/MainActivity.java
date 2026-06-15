@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.parse.FindCallback;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
@@ -41,7 +40,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ParseObject.registerSubclass(Item.class);
         setContentView(R.layout.item_activity);
         ParseAnalytics.trackAppOpened(getIntent());
 

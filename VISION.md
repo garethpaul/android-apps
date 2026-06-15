@@ -20,6 +20,7 @@ Priority:
 - Preserve the Traveller project structure and documented legacy toolchain
 - Keep Parse credentials out of git through `Constants.java.example`
 - Reject blank or unchanged Parse placeholders before SDK initialization
+- Keep application-owned Parse subclass registration before SDK initialization
 - Maintain SDK-free baseline checks for quick verification
 - Keep lint, test, and build gate targets available from the repository root
 - Keep Traveller item creation from persisting empty-looking task records
