@@ -43,6 +43,9 @@ Helpful reports include:
   same query without hiding failures that occur before any usable result.
 - Keep application-owned Parse subclass registration before SDK initialization
   so activity recreation cannot alter process-wide model setup.
+- Traveller's explicit launcher export boundary is limited to `MainActivity`;
+  the portable contract couples it to the `MAIN`/`LAUNCHER` intent filter and
+  rejects unrelated exported components.
 - Optimistic creates and toggles invalidate stale Parse query callbacks before
   changing adapter state, preventing older server snapshots from undoing the
   user's current visible action.

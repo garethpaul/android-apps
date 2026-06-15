@@ -123,6 +123,8 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
   adding a new row or applying a completion toggle.
 - Traveller keeps application-owned Parse subclass registration before SDK
   initialization so activity recreation cannot repeat process-wide model setup.
+- Traveller's explicit launcher export boundary is limited to `MainActivity`
+  and coupled to the existing `MAIN`/`LAUNCHER` intent filter.
 - Local IDE metadata stays ignored, including nested Android Studio project
   metadata, so editor workspace files do not become part of the shared
   Traveller baseline.

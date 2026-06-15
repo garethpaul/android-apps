@@ -2,6 +2,9 @@
 
 ## 2026-06-15
 
+- Added an explicit launcher export boundary for Traveller's sole
+  `MAIN`/`LAUNCHER` activity and a structural manifest contract that rejects
+  implicit, false, duplicated, or unrelated export declarations.
 - Moved `Item` to application-owned Parse subclass registration before SDK
   initialization, preventing activity recreation from repeating global setup.
 - Added mutation-sensitive ownership and initialization-order contracts.

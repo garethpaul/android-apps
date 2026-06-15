@@ -50,6 +50,8 @@
   before adapter rollback, feedback, or refresh work.
 - Keep application-owned Parse subclass registration ahead of SDK
   initialization; activities must not repeat process-wide model setup.
+- Keep the explicit launcher export boundary on `MainActivity`, which owns the
+  sole `MAIN`/`LAUNCHER` entry point; do not export unrelated components.
 
 ## Agent workflow
 

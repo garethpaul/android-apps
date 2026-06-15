@@ -1,7 +1,7 @@
 ---
 title: Traveller Explicit Launcher Export Boundary
 type: security
-status: planned
+status: completed
 date: 2026-06-15
 ---
 
@@ -73,8 +73,8 @@ remaining legacy-platform limitations.
   coupling, missing guidance, and incomplete plan status.
 - Audit generated Android artifacts, the exact diff, whitespace, conflict
   markers, file modes, and changed lines for credential material.
-- Record unavailable Android SDK, emulator, physical-device, and live Parse
-  validation without claiming those scenarios ran.
+- Record Android SDK-backed lint and assembly separately from unavailable
+  emulator, physical-device, and live Parse validation.
 
 ## Risks And Mitigations
 
@@ -94,3 +94,18 @@ remaining legacy-platform limitations.
 - Adding deep links, services, receivers, providers, or additional activities.
 - Changing Parse credentials, endpoints, queries, task persistence, or UI
   behavior.
+
+## Completion Evidence
+
+- `sh -n scripts/check-baseline.sh` and the focused portable checker passed.
+- repository and external-directory `make check` passed with Android lint and
+  debug assembly enabled under Java 8, Android platform 19, and build-tools
+  24.0.3; Android lint reported zero issues in debug and release variants.
+- Seven isolated hostile mutations were rejected for a missing declaration,
+  `false`, an application-owned declaration, removed launcher-filter coupling,
+  a same-line duplicate attribute, missing maintained guidance, and incomplete
+  plan status.
+- The final exact diff, generated-artifact cleanup, file modes, whitespace,
+  conflict markers, dependency/workflow drift, and changed-line credential
+  signatures were audited before commit.
+- No emulator, physical-device, or live Parse scenario was executed.

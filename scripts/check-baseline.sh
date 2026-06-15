@@ -112,6 +112,47 @@ require_absent "traveller-android-app/traveller/src/main/AndroidManifest.xml" \
   'android:allowBackup="true"' \
   "Traveller must not allow Android backups."
 
+MANIFEST="traveller-android-app/traveller/src/main/AndroidManifest.xml"
+exported_count=$(awk '
+  {
+    line = $0
+    while (match(line, /android:exported=/)) {
+      count++
+      line = substr(line, RSTART + RLENGTH)
+    }
+  }
+  END { print count + 0 }
+' "$ROOT_DIR/$MANIFEST")
+if [ "$exported_count" -ne 1 ]; then
+  printf '%s\n' "Traveller must declare exactly one explicit component export boundary." >&2
+  exit 1
+fi
+if ! awk '
+  /<activity([[:space:]>]|$)/ {
+    in_activity = 1
+    name = 0
+    exported = 0
+    main_action = 0
+    launcher_category = 0
+  }
+  in_activity && /android:name="com\.requestlabs\.traveller\.MainActivity"/ { name = 1 }
+  in_activity && /android:exported="true"/ { exported++ }
+  in_activity && /android.intent.action.MAIN/ { main_action = 1 }
+  in_activity && /android.intent.category.LAUNCHER/ { launcher_category = 1 }
+  in_activity && /<\/activity>/ {
+    if (name && exported == 1 && main_action && launcher_category) {
+      valid_launcher++
+    }
+    in_activity = 0
+  }
+  END { exit !(valid_launcher == 1) }
+' "$ROOT_DIR/$MANIFEST"; then
+  printf '%s\n' "Traveller launcher activity must be explicitly exported with its MAIN/LAUNCHER filter." >&2
+  exit 1
+fi
+require_absent "$MANIFEST" 'android:exported="false"' \
+  "Traveller launcher activity must remain externally reachable."
+
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
   "requireParseConfiguration();" \
   "Traveller must validate local Parse configuration before initialization."
@@ -744,6 +785,21 @@ for parse_registration_plan_contract in \
   require_contains "docs/plans/2026-06-15-traveller-parse-subclass-bootstrap.md" \
     "$parse_registration_plan_contract" \
     "Traveller Parse subclass bootstrap plan must keep completion evidence: $parse_registration_plan_contract"
+done
+
+for launcher_export_doc in "AGENTS.md" "README.md" "SECURITY.md" "VISION.md" "CHANGES.md"; do
+  require_contains "$launcher_export_doc" "explicit launcher export boundary" \
+    "$launcher_export_doc must document the explicit launcher export boundary."
+done
+
+for launcher_export_plan_contract in \
+  "status: completed" \
+  'android:exported="true"' \
+  'repository and external-directory `make check` passed' \
+  "hostile mutations were rejected"; do
+  require_contains "docs/plans/2026-06-15-traveller-explicit-launcher-export.md" \
+    "$launcher_export_plan_contract" \
+    "Traveller launcher export plan must keep completion evidence: $launcher_export_plan_contract"
 done
 
 require_contains "traveller-android-app/.gitignore" \
