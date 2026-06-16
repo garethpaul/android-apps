@@ -11,7 +11,7 @@ lint:
 	$(ROOT)scripts/check-baseline.sh
 
 test:
-	$(ROOT)scripts/check-baseline.sh
+	$(ROOT)scripts/test-task-description-normalizer.sh
 
 build:
 	@if [ -z "$${ANDROID_HOME}$${ANDROID_SDK_ROOT}" ]; then \

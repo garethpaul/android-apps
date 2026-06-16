@@ -75,6 +75,8 @@ Good-faith research is welcome when it stays within these boundaries:
 - avoid destructive actions, persistence, spam, phishing, social engineering, or denial-of-service testing
 - minimize access to personal data and stop testing immediately if private data is exposed
 - do not exfiltrate secrets or third-party data; report the minimum evidence needed to verify impact
+- the portable task-description behavior test uses no credentials, network,
+  Android SDK, emulator, or Parse backend
 - keep vulnerability details confidential until the maintainer has assessed the report
 
 ## Maintainer Response

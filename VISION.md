@@ -24,6 +24,7 @@ Priority:
 - Keep the explicit launcher export boundary limited to `MainActivity` and keep
   unrelated Android components private
 - Maintain SDK-free baseline checks for quick verification
+- Execute task-description behavior on a standard JDK without Android or Parse
 - Keep lint, test, and build gate targets available from the repository root
 - Keep Traveller item creation from persisting empty-looking task records
 - Keep task creation safe when legacy input views are missing

@@ -1,5 +1,14 @@
 # Changes
 
+## 2026-06-16
+
+- Extracted Traveller task-description behavior into a package-local pure Java
+  normalizer used by `MainActivity`.
+- Added a dependency-free JVM test for null, empty, whitespace-only, ASCII, and
+  Unicode descriptions, with temporary compiler output cleaned on every exit.
+- Pinned hosted Java setup, disabled persisted checkout credentials, and made
+  feature-branch pushes run the canonical `make check` gate.
+
 ## 2026-06-15
 
 - Added an explicit launcher export boundary for Traveller's sole

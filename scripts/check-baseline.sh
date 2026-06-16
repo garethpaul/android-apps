@@ -225,11 +225,28 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
   "if(mTaskInput == null || mTaskInput.getText() == null)" \
   "Traveller task description normalization must tolerate missing input views."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
-  'return "";' \
-  "Traveller task description normalization must return an empty description for missing input views."
+  "TaskDescriptionNormalizer.normalize(null)" \
+  "Traveller task description normalization must delegate missing input views to the pure normalizer."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
-  "return mTaskInput.getText().toString().trim();" \
-  "Traveller task descriptions must be trimmed before validation."
+  "TaskDescriptionNormalizer.normalize(mTaskInput.getText().toString())" \
+  "Traveller task descriptions must delegate entered text to the pure normalizer."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
+  ".toString().trim()" \
+  "Traveller task-description behavior must remain centralized in the pure normalizer."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/TaskDescriptionNormalizer.java" \
+  'return description == null ? "" : description.trim();' \
+  "Traveller task descriptions must remain null-safe and trimmed."
+for normalizer_test_contract in \
+  'assertNormalized("", null, "null descriptions")' \
+  'assertNormalized("", "", "empty descriptions")' \
+  'assertNormalized("", " \t\n ", "whitespace-only descriptions")' \
+  'assertNormalized("Buy milk", "  Buy milk  ", "ASCII descriptions")' \
+  'assertNormalized("café 東京", "  café 東京  ", "Unicode descriptions")'; do
+  require_contains \
+    "traveller-android-app/traveller/src/test/java/com/requestlabs/traveller/TaskDescriptionNormalizerTest.java" \
+    "$normalizer_test_contract" \
+    "Traveller task-description JVM test must keep case: $normalizer_test_contract"
+done
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   "t.setDescription(description);" \
   "Traveller task creation must persist the normalized description."
@@ -854,12 +871,52 @@ require_contains "Makefile" \
 require_contains "Makefile" \
   "verify: lint test build" \
   "Makefile verify must run lint, test, and build gates in order."
+require_contains "Makefile" \
+  '$(ROOT)scripts/test-task-description-normalizer.sh' \
+  "Makefile test must run the dependency-free task-description JVM test."
+for required_path in \
+  "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
+  "scripts/test-task-description-normalizer.sh" \
+  "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/TaskDescriptionNormalizer.java" \
+  "traveller-android-app/traveller/src/test/java/com/requestlabs/traveller/TaskDescriptionNormalizerTest.java"; do
+  if [ ! -f "$ROOT_DIR/$required_path" ]; then
+    printf '%s\n' "Required task-description JVM test file is missing: $required_path" >&2
+    exit 1
+  fi
+done
+if [ ! -x "$ROOT_DIR/scripts/test-task-description-normalizer.sh" ]; then
+  printf '%s\n' "Task-description JVM test runner must be executable." >&2
+  exit 1
+fi
+for runner_contract in \
+  'mktemp -d' \
+  'trap '\''rm -rf "$BUILD_DIR"'\'' EXIT HUP INT TERM' \
+  '"$JAVAC" -source 7 -target 7 -d "$BUILD_DIR"' \
+  '"$JAVA" -cp "$BUILD_DIR" com.requestlabs.traveller.TaskDescriptionNormalizerTest'; do
+  require_contains "scripts/test-task-description-normalizer.sh" "$runner_contract" \
+    "Task-description JVM runner must keep contract: $runner_contract"
+done
 require_contains "docs/plans/2026-06-08-traveller-constants-helper.md" \
   "make check" \
   "Traveller constants helper plan must record make check verification."
 require_contains ".github/workflows/check.yml" \
   "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10" \
   "GitHub Actions workflow must pin checkout to an immutable revision."
+require_contains ".github/workflows/check.yml" \
+  "persist-credentials: false" \
+  "GitHub Actions checkout must not persist repository credentials."
+require_contains ".github/workflows/check.yml" \
+  "actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00" \
+  "GitHub Actions workflow must pin Java setup to an immutable revision."
+require_contains ".github/workflows/check.yml" \
+  "distribution: temurin" \
+  "GitHub Actions workflow must select the Temurin JDK distribution."
+require_contains ".github/workflows/check.yml" \
+  "java-version: '8'" \
+  "GitHub Actions workflow must run the legacy-compatible Java 8 test gate."
+require_absent ".github/workflows/check.yml" \
+  "branches:" \
+  "GitHub Actions push checks must cover feature branches."
 require_contains ".github/workflows/check.yml" \
   "permissions:" \
   "GitHub Actions workflow must declare permissions."
@@ -887,8 +944,12 @@ require_exact_line "Makefile" \
 require_exact_line "Makefile" \
   'TRAVELLER_CONSTANTS := $(ROOT)traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java' \
   "Makefile must derive Traveller constants from the protected repository root."
-if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 3 ]; then
-  printf '%s\n' "All three baseline commands must use the protected repository root." >&2
+if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 2 ]; then
+  printf '%s\n' "Both baseline commands must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-task-description-normalizer.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The JVM behavior test must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/prepare-traveller-constants.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
@@ -918,6 +979,8 @@ require_contains "README.md" "make lint" \
   "README must document the make lint gate."
 require_contains "README.md" "make test" \
   "README must document the make test gate."
+require_contains "README.md" "dependency-free JVM test" \
+  "README must document the executable task-description behavior gate."
 require_contains "README.md" "make build" \
   "README must document the make build gate."
 require_contains "README.md" "GitHub Actions" \
@@ -992,5 +1055,19 @@ require_contains "CHANGES.md" "GitHub Actions" \
   "CHANGES must record the GitHub Actions baseline."
 require_contains "CHANGES.md" "make check" \
   "CHANGES must record the CI make check gate."
+
+for behavior_doc in "AGENTS.md" "README.md" "SECURITY.md" "VISION.md" "CHANGES.md"; do
+  require_contains "$behavior_doc" "task-description behavior" \
+    "$behavior_doc must document the portable task-description behavior gate."
+done
+for task_description_plan_contract in \
+  "Status: Completed" \
+  'Repository and external-directory `make test` and `make check` passed' \
+  "hostile mutations were rejected" \
+  "No Android SDK, emulator, physical-device, or live Parse scenario was executed"; do
+  require_contains "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
+    "$task_description_plan_contract" \
+    "Traveller task-description JVM test plan must keep completion evidence: $task_description_plan_contract"
+done
 
 printf '%s\n' "Traveller Android baseline checks passed."
