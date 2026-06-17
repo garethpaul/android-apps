@@ -1,6 +1,6 @@
 # Traveller Unicode Task Whitespace
 
-## Status: Planned
+## Status: Completed
 
 ## Problem
 
@@ -74,4 +74,16 @@ cases, maintained guidance, completed status, and actual verification.
 
 ## Completed Verification
 
-To be recorded after implementation and validation.
+- The pre-fix JVM run reproduced Unicode-space-only input remaining non-empty.
+- Focused task-description tests passed for null, empty, ASCII whitespace,
+  Unicode whitespace, Unicode content, preserved interior spacing, and legacy
+  U+0020-and-below boundary characters.
+- Repository and external-directory `make test` and `make check` passed.
+- The optional Android build reported its documented skip because no Android
+  SDK is configured in this environment.
+- Nine isolated hostile mutations were rejected across the legacy boundary,
+  both Unicode classifiers, leading and trailing scans, focused cases,
+  guidance, and completed-plan evidence.
+- Exact diff, generated-artifact, secret, conflict, mode, dependency/workflow,
+  file-size, and whitespace audits passed.
+- No Android SDK, emulator, physical-device, or live Parse scenario was executed.

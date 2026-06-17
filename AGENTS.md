@@ -45,6 +45,7 @@
 - Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
 - Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
 - Traveller trims task descriptions and rejects whitespace-only entries before saving Parse `Item` records.
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Traveller treats a missing task input view as an empty description so stale layouts do not crash task creation.
 - Traveller ignores item toggle events when the adapter, selected item, row view, or row text view is unavailable or malformed.
 - Parse save callbacks must match the current visible lifecycle generation

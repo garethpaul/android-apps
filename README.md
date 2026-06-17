@@ -95,6 +95,7 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
   `super.onCreate()` before configuration validation and Parse initialization.
 - Traveller trims task descriptions and rejects whitespace-only entries before
   saving Parse `Item` records.
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Traveller treats a missing task input view as an empty description so stale
   layouts do not crash task creation.
 - Traveller ignores item toggle events when the adapter, selected item, row
@@ -153,6 +154,8 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
   task input normalization contract.
 - See `docs/plans/2026-06-16-traveller-task-description-jvm-test.md` for the
   executable task-description behavior boundary.
+- See `docs/plans/2026-06-17-traveller-unicode-task-whitespace.md` for Unicode
+  boundary-whitespace handling.
 - See `docs/plans/2026-06-09-traveller-task-input-null-guard.md` for the task
   input null guard.
 - See `docs/plans/2026-06-09-traveller-item-toggle-guards.md` for item-toggle

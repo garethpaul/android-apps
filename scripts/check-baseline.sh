@@ -233,15 +233,30 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
   ".toString().trim()" \
   "Traveller task-description behavior must remain centralized in the pure normalizer."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/TaskDescriptionNormalizer.java" \
-  'return description == null ? "" : description.trim();' \
-  "Traveller task descriptions must remain null-safe and trimmed."
+for normalizer_contract in \
+  "if(description == null)" \
+  "while(start < end && isTaskWhitespace(description.charAt(start)))" \
+  "while(start < end && isTaskWhitespace(description.charAt(end - 1)))" \
+  "return description.substring(start, end);" \
+  "private static boolean isTaskWhitespace(char value)" \
+  "value <= ' '" \
+  "Character.isWhitespace(value)" \
+  "Character.isSpaceChar(value)"; do
+  require_contains \
+    "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/TaskDescriptionNormalizer.java" \
+    "$normalizer_contract" \
+    "Traveller task descriptions must keep boundary-whitespace contract: $normalizer_contract"
+done
 for normalizer_test_contract in \
   'assertNormalized("", null, "null descriptions")' \
   'assertNormalized("", "", "empty descriptions")' \
   'assertNormalized("", " \t\n ", "whitespace-only descriptions")' \
+  'assertNormalized("", "\u00a0\u2003\u3000", "Unicode whitespace-only descriptions")' \
   'assertNormalized("Buy milk", "  Buy milk  ", "ASCII descriptions")' \
-  'assertNormalized("café 東京", "  café 東京  ", "Unicode descriptions")'; do
+  'assertNormalized("café 東京", "  café 東京  ", "Unicode descriptions")' \
+  'assertNormalized("café 東京", "\u00a0\u2003café 東京\u3000", "Unicode boundary whitespace")' \
+  'assertNormalized("Plan\u00a0trip", "Plan\u00a0trip", "interior Unicode spacing")' \
+  'assertNormalized("Buy milk", "\u0000Buy milk\u001f", "legacy trim control characters")'; do
   require_contains \
     "traveller-android-app/traveller/src/test/java/com/requestlabs/traveller/TaskDescriptionNormalizerTest.java" \
     "$normalizer_test_contract" \
@@ -876,6 +891,7 @@ require_contains "Makefile" \
   "Makefile test must run the dependency-free task-description JVM test."
 for required_path in \
   "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
+  "docs/plans/2026-06-17-traveller-unicode-task-whitespace.md" \
   "scripts/test-task-description-normalizer.sh" \
   "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/TaskDescriptionNormalizer.java" \
   "traveller-android-app/traveller/src/test/java/com/requestlabs/traveller/TaskDescriptionNormalizerTest.java"; do
@@ -1068,6 +1084,21 @@ for task_description_plan_contract in \
   require_contains "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
     "$task_description_plan_contract" \
     "Traveller task-description JVM test plan must keep completion evidence: $task_description_plan_contract"
+done
+
+unicode_whitespace_guidance="Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions."
+for unicode_whitespace_doc in "AGENTS.md" "README.md" "SECURITY.md" "VISION.md" "CHANGES.md"; do
+  require_contains "$unicode_whitespace_doc" "$unicode_whitespace_guidance" \
+    "$unicode_whitespace_doc must document Unicode task boundary whitespace."
+done
+for unicode_whitespace_plan_contract in \
+  "Status: Completed" \
+  'Repository and external-directory `make test` and `make check` passed' \
+  "hostile mutations were rejected" \
+  "No Android SDK, emulator, physical-device, or live Parse scenario was executed"; do
+  require_contains "docs/plans/2026-06-17-traveller-unicode-task-whitespace.md" \
+    "$unicode_whitespace_plan_contract" \
+    "Traveller Unicode whitespace plan must keep completion evidence: $unicode_whitespace_plan_contract"
 done
 
 printf '%s\n' "Traveller Android baseline checks passed."

@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-17
+
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
+- Added executable regressions for Unicode-space-only input, Unicode boundary
+  trimming, preserved interior spacing, and legacy control-character trimming.
+
 ## 2026-06-16
 
 - Extracted Traveller task-description behavior into a package-local pure Java

@@ -27,6 +27,7 @@ Priority:
 - Execute task-description behavior on a standard JDK without Android or Parse
 - Keep lint, test, and build gate targets available from the repository root
 - Keep Traveller item creation from persisting empty-looking task records
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Keep task creation safe when legacy input views are missing
 - Keep task toggle handling safe when legacy row state is missing or malformed
 - Keep task toggle handling safe when list-click positions are stale
