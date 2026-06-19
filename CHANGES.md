@@ -37,8 +37,8 @@
   reconcile against a newly resumed adapter.
 - Added per-task save generations so late same-item callbacks cannot reconcile
   over a newer optimistic save in the same visible lifecycle.
-- Added data-generation ownership to optimistic save failures so callbacks from
-  superseded adapter state cannot remove or restore stale task objects.
+- Corrected independent optimistic save failures so unrelated later task
+  mutations no longer suppress rollback, notification, and refresh.
 - Suppressed expected Parse cache-miss callbacks while `CACHE_THEN_NETWORK`
   continues to the backend, preserving toasts for actual load failures.
 - Suppressed later Parse network-error toasts after a successful cached task delivery

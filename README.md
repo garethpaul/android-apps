@@ -120,8 +120,9 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
   they can roll back or refresh a newly resumed adapter.
 - Traveller accepts only the latest save callback for each task identity, so an
   older same-item failure cannot undo a newer optimistic save.
-- Traveller ignores save failures whose data generation was superseded by a
-  later query or optimistic mutation before adapter reconciliation.
+- Traveller reconciles independent optimistic save failures even when later
+  unrelated task mutations occur; same-task supersession is owned by per-task
+  save generations.
 - Traveller refreshes incomplete items when `MainActivity` starts and ignores
   callbacks after the activity stops or a newer refresh supersedes them.
 - Traveller optimistic mutations invalidate stale Parse query callbacks before

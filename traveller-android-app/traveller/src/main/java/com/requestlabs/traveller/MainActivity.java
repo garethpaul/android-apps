@@ -84,14 +84,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 mAdapter.add(t);
             }
             saveNewTask(t);
-            mTaskInput.setText("");
+            if(mTaskInput != null){
+                mTaskInput.setText("");
+            }
         }
 
     }
 
     private void saveNewTask(final Item task){
         final int lifecycleGeneration = mLifecycleGeneration;
-        final int dataGeneration = mDataGeneration;
         final int saveGeneration = beginTaskSave(task);
         task.saveEventually(new SaveCallback() {
             @Override
@@ -103,9 +104,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     return;
                 }
                 if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
-                    return;
-                }
-                if(dataGeneration != mDataGeneration){
                     return;
                 }
 
@@ -229,7 +227,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private void saveTaskCompletion(final Item task, final boolean previousCompleted){
         final int lifecycleGeneration = mLifecycleGeneration;
-        final int dataGeneration = mDataGeneration;
         final int saveGeneration = beginTaskSave(task);
         task.saveEventually(new SaveCallback() {
             @Override
@@ -242,9 +239,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 }
 
                 if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
-                    return;
-                }
-                if(dataGeneration != mDataGeneration){
                     return;
                 }
 

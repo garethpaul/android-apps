@@ -1,21 +1,23 @@
-# Bind Traveller Save Failures to Data Generations
+# Keep Traveller Save Failures Per-Task Owned
 
 Status: Completed
 
 ## Context
 
 Traveller rejects save callbacks from stopped lifecycles and older saves of the
-same `Item` identity. A later Parse query or optimistic mutation can still
-supersede the adapter contents while an earlier save remains current for its
-old object identity. If that save fails, its callback can remove or re-add the
-stale object after newer data is visible.
+same `Item` identity. A global data-generation guard was considered for save
+failure callbacks, but that ownership boundary is too broad: a later unrelated
+task mutation can advance `mDataGeneration` and suppress rollback for an earlier
+task whose save still failed. The corrected contract keeps query staleness owned
+by `mDataGeneration`; same-task supersession is owned by per-task save
+generations.
 
 ## Scope
 
-- Capture the current data generation when each new-task or completion save is
-  queued.
-- Reconcile a save failure only when its lifecycle, task-save generation, and
-  data generation all remain current.
+- Do not capture global data generations in new-task or completion save
+  callbacks.
+- Reconcile a save failure when its lifecycle and task-save generation remain
+  current.
 - Preserve success handling, Parse persistence, optimistic UI behavior,
   query-generation ownership, and localized generic errors.
 - Add mutation-sensitive portable contracts, completed plan evidence, and
@@ -23,26 +25,25 @@ stale object after newer data is visible.
 
 ## Implementation Units
 
-### U1. Guard save-failure reconciliation
+### U1. Guard save-failure reconciliation by task ownership
 
 **Files:**
 
 - `traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java`
 
-Capture the initiating data generation in both save paths. After confirming the
-callback owns the latest save for that task, reject failed callbacks whose data
-generation was superseded before they mutate the adapter, restore completion
-state, show an error, or launch another query.
+After confirming the callback owns the latest save for that task and belongs to
+the current visible lifecycle, reconcile the failed save even if unrelated task
+mutations happened later.
 
-### U2. Protect the ordering contract
+### U2. Protect the ownership contract
 
 **Files:**
 
 - `scripts/check-baseline.sh`
 - `docs/plans/2026-06-14-traveller-save-callback-data-generation.md`
 
-Require exactly two data-generation captures and guards, with each guard after
-the save-generation check and before failure reconciliation.
+Reject global data-generation guards inside save callbacks while preserving the
+query-generation guard for Parse result callbacks.
 
 ### U3. Document callback ownership
 
@@ -53,21 +54,22 @@ the save-generation check and before failure reconciliation.
 - `VISION.md`
 - `CHANGES.md`
 
-Describe data-generation ownership as part of optimistic save-failure safety.
+Describe independent optimistic save failures and per-task callback ownership.
 
 ## Verification
 
-Completed on 2026-06-14:
+Completed on 2026-06-14 and corrected on 2026-06-19:
 
 - Root and external-working-directory `make check` both passed the shell syntax
   and portable Traveller baseline checks; the legacy Gradle build was
   truthfully skipped because no Android SDK was configured.
-- Six focused mutations were rejected when they removed a capture or guard,
-  moved reconciliation before the guard, removed documentation contracts, or
-  reopened this plan.
+- Focused mutations were rejected when they removed lifecycle or per-task save
+  ownership, reintroduced global data-generation save guards, removed
+  documentation contracts, or reopened this plan.
 
 ## Risks
 
-- A superseded failed save will no longer show a toast or force a refresh; the
-  newer query or mutation already owns the visible state.
+- An unrelated later optimistic mutation no longer suppresses a failed save for
+  another task. A same-task older callback is still suppressed by per-task save
+  generations.
 - This does not cancel Parse's queued persistence or replace the legacy SDK.
