@@ -27,8 +27,8 @@
 
 ## Testing guidance
 
-- Keep `make test` executing the dependency-free build-gate, constants, and
-  task-description behavior tests without Android or Parse dependencies.
+- Keep `make test` executing the dependency-free build-gate, constants,
+  Parse-configuration, and task-description behavior tests without Android or Parse dependencies.
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 

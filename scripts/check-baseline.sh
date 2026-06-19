@@ -38,12 +38,22 @@ require_exact_line() {
 
 for required_path in \
   "DEVICE_VERIFICATION.md" \
+  "docs/device-preview.svg" \
   "docs/plans/2026-06-14-traveller-device-verification-checklist.md"; do
   if [ ! -f "$ROOT_DIR/$required_path" ]; then
     printf '%s\n' "Required file is missing: $required_path" >&2
     exit 1
   fi
 done
+
+require_contains "README.md" "![Device preview](docs/device-preview.svg)" \
+  "README must render the Traveller device preview."
+require_contains "docs/device-preview.svg" \
+  "Traveller Android application preview" \
+  "Traveller device preview must retain its accessible title."
+require_contains "docs/device-preview.svg" \
+  "Repository preview based on" \
+  "Traveller device preview must remain clearly identified as a repository preview."
 
 for device_contract in \
   'commit SHA and pull request' \
@@ -163,18 +173,30 @@ require_absent "$MANIFEST" 'android:exported="false"' \
   "Traveller launcher activity must remain externally reachable."
 
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  "requireParseConfiguration();" \
+  "ParseConfiguration.configuredValue(" \
   "Traveller must validate local Parse configuration before initialization."
+require_exact_line "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  "        Parse.initialize(this, applicationId, clientKey);" \
+  "Traveller must initialize Parse with normalized configuration values."
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+  "Parse.initialize(this, Constants.api_key, Constants.client_id);" \
+  "Traveller must not initialize Parse with unnormalized constants."
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
   "super.onCreate();" \
   "Traveller Application startup must call the superclass lifecycle method."
 if ! awk '
   /super\.onCreate\(\);/ { super_line = NR }
-  /requireParseConfiguration\(\);/ && !guard_line { guard_line = NR }
+  /ParseObject\.registerSubclass\(Item\.class\);/ { register_line = NR }
+  /String applicationId = ParseConfiguration\.configuredValue\(/ { application_line = NR }
+  /String clientKey = ParseConfiguration\.configuredValue\(/ { client_line = NR }
   /Parse\.initialize\(/ { parse_line = NR }
-  END { exit !(super_line && guard_line && parse_line && super_line < guard_line && guard_line < parse_line) }
+  END {
+    exit !(super_line && register_line && application_line && client_line && parse_line &&
+      super_line < register_line && register_line < application_line &&
+      application_line < client_line && client_line < parse_line)
+  }
 ' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java"; then
-  printf '%s\n' "Traveller startup must call super, validate configuration, then initialize Parse." >&2
+  printf '%s\n' "Traveller startup must call super, register Item, normalize both credentials, then initialize Parse." >&2
   exit 1
 fi
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
@@ -183,16 +205,19 @@ require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/
 require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
   'CLIENT_KEY_PLACEHOLDER = "parse-client-key"' \
   "Traveller must keep the Parse client-key placeholder explicit."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  "value.trim().length() > 0" \
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ParseConfiguration.java" \
+  "String configuredValue = value.trim();" \
+  "Traveller must normalize Parse configuration before initialization."
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ParseConfiguration.java" \
+  "configuredValue.length() == 0" \
   "Traveller must reject blank Parse configuration values."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
-  '!placeholder.equals(value.trim())' \
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ParseConfiguration.java" \
+  'placeholder.equals(configuredValue)' \
   "Traveller must reject unchanged Parse placeholder values."
-require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ParseConfiguration.java" \
   "Traveller Parse configuration is missing" \
   "Traveller must fail with a non-secret configuration diagnostic."
-require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
+require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ParseConfiguration.java" \
   '" + Constants.' \
   "Traveller configuration diagnostics must not append Parse credential values."
 require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java" \
@@ -985,6 +1010,10 @@ if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 2
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-task-description-normalizer.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
   printf '%s\n' "The JVM behavior test must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-parse-configuration.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The Parse configuration JVM test must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-constants-generation.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then

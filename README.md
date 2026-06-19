@@ -3,6 +3,11 @@
 <!-- README-OVERVIEW-IMAGE -->
 ![Project overview](docs/readme-overview.svg)
 
+## Device Preview
+
+<!-- DEVICE-PREVIEW-IMAGE -->
+![Device preview](docs/device-preview.svg)
+
 ## Overview
 
 `garethpaul/android-apps` is an Android application or sample. Personal Android Apps
@@ -47,6 +52,7 @@ make build
 scripts/check-baseline.sh
 scripts/prepare-traveller-constants.sh
 scripts/test-constants-generation.sh
+scripts/test-parse-configuration.sh
 cd traveller-android-app
 ./gradlew lint --no-daemon
 ./gradlew check --no-daemon
@@ -69,7 +75,8 @@ starting the application because startup rejects unchanged placeholders.
 
 - `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
 - `make test` - verifies the fail-closed build gate, idempotent constants
-  generation, and dependency-free JVM behavior for task-description normalization
+  generation, and dependency-free JVM behavior for Parse configuration and
+  task-description normalization
 - `make build` - requires an Android SDK, then runs legacy Traveller Android
   lint and debug APK assembly; Gradle creates missing local placeholder constants
   through `preBuild`, and unavailable SDK tooling fails the gate
@@ -77,6 +84,8 @@ starting the application because startup rejects unchanged placeholders.
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - `scripts/test-constants-generation.sh` - verifies placeholder creation and
   proves existing local credentials are not overwritten
+- `scripts/test-parse-configuration.sh` - proves Parse values are trimmed and
+  blank or placeholder values fail before initialization
 - The baseline check also protects source-level contracts for Traveller row
   inflation, Parse subclass registration, and task input normalization.
 - The task-description behavior test compiles only the pure normalizer and its
@@ -105,6 +114,8 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
 - Traveller fails before `Parse.initialize` when either local Parse value is
   blank or still matches the checked-in template placeholder. The diagnostic
   never includes configured credential values.
+- Traveller trims both configured Parse values before passing them to
+  `Parse.initialize`.
 - Traveller preserves the Android `Application` lifecycle by calling
   `super.onCreate()` before configuration validation and Parse initialization.
 - Traveller trims task descriptions and rejects whitespace-only entries before

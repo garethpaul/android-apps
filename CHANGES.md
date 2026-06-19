@@ -9,6 +9,10 @@
 - Added a behavioral build-gate regression and provisioned Android API 19 plus
   build-tools 24.0.3 in hosted verification.
 
+- Recovered the closed device-preview work and normalized configured Parse
+  values before initialization without restoring the superseded activity or CI
+  implementations from the historical branch.
+
 ## 2026-06-17
 
 - Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.

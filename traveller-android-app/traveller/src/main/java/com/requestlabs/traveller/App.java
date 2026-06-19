@@ -18,21 +18,10 @@ public class App extends Application {
     {
         super.onCreate();
         ParseObject.registerSubclass(Item.class);
-        requireParseConfiguration();
-        Parse.initialize(this, Constants.api_key, Constants.client_id);
-    }
-
-    private static void requireParseConfiguration(){
-        if(!isConfigured(Constants.api_key, APPLICATION_ID_PLACEHOLDER) ||
-                !isConfigured(Constants.client_id, CLIENT_KEY_PLACEHOLDER)){
-            throw new IllegalStateException(
-                    "Traveller Parse configuration is missing; replace Constants.java placeholders locally.");
-        }
-    }
-
-    private static boolean isConfigured(String value, String placeholder){
-        return value != null &&
-                value.trim().length() > 0 &&
-                !placeholder.equals(value.trim());
+        String applicationId = ParseConfiguration.configuredValue(
+                Constants.api_key, APPLICATION_ID_PLACEHOLDER);
+        String clientKey = ParseConfiguration.configuredValue(
+                Constants.client_id, CLIENT_KEY_PLACEHOLDER);
+        Parse.initialize(this, applicationId, clientKey);
     }
 }
