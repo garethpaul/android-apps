@@ -92,6 +92,15 @@ require_contains "traveller-android-app/traveller/build.gradle" \
   "buildToolsVersion \"24.0.3\"" \
   "Android build-tools must stay pinned to 24.0.3."
 require_contains "traveller-android-app/traveller/build.gradle" \
+  "task generateConstants(type: Exec)" \
+  "Traveller Gradle build must define generateConstants."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "commandLine 'sh', new File(rootDir, '../scripts/prepare-traveller-constants.sh').canonicalPath" \
+  "generateConstants must delegate to the idempotent repository helper."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "preBuild.dependsOn generateConstants" \
+  "Traveller preBuild must generate missing local constants."
+require_contains "traveller-android-app/traveller/build.gradle" \
   "com.android.support:appcompat-v7:19.1.0" \
   "appcompat must stay pinned to 19.1.0."
 require_absent "traveller-android-app/traveller/build.gradle" \
@@ -958,6 +967,10 @@ if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 2
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-task-description-normalizer.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
   printf '%s\n' "The JVM behavior test must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-constants-generation.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The constants generation test must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/prepare-traveller-constants.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then

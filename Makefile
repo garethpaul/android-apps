@@ -11,6 +11,7 @@ lint:
 	$(ROOT)scripts/check-baseline.sh
 
 test:
+	$(ROOT)scripts/test-constants-generation.sh
 	$(ROOT)scripts/test-task-description-normalizer.sh
 
 build:

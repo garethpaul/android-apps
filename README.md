@@ -46,6 +46,7 @@ make test
 make build
 scripts/check-baseline.sh
 scripts/prepare-traveller-constants.sh
+scripts/test-constants-generation.sh
 cd traveller-android-app
 ./gradlew lint --no-daemon
 ./gradlew check --no-daemon
@@ -54,6 +55,12 @@ cd traveller-android-app
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
 
+Traveller's Gradle `preBuild` creates a local placeholder `Constants.java` from
+`Constants.java.example` when the file is missing. The same idempotent setup can
+be run directly with `scripts/prepare-traveller-constants.sh`. Neither path
+overwrites an existing local file; replace both placeholder Parse values before
+starting the application because startup rejects unchanged placeholders.
+
 ## Running or Using the Project
 
 - Use Android Studio to open the project or run `gradle assembleDebug` when the Android SDK is configured.
@@ -61,11 +68,13 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
-- `make test` - runs the dependency-free JVM test for Traveller
-  task-description behavior
+- `make test` - verifies idempotent constants generation and runs the
+  dependency-free JVM test for Traveller task-description behavior
 - `make build` - runs legacy Traveller Android lint and debug APK assembly when Android SDK configuration and local constants are present; otherwise it reports a skip
 - `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
+- `scripts/test-constants-generation.sh` - verifies placeholder creation and
+  proves existing local credentials are not overwritten
 - The baseline check also protects source-level contracts for Traveller row
   inflation, Parse subclass registration, and task input normalization.
 - The task-description behavior test compiles only the pure normalizer and its
@@ -87,7 +96,9 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 - Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
-- Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
+- Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
+  `Constants.java.example` only when the local file is missing. Replace the
+  placeholder Parse values locally; `Constants.java` must stay ignored.
 - Traveller fails before `Parse.initialize` when either local Parse value is
   blank or still matches the checked-in template placeholder. The diagnostic
   never includes configured credential values.
