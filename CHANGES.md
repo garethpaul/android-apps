@@ -1,5 +1,14 @@
 # Changes
 
+## 2026-06-19
+
+- Made the repository build gate fail closed when Android SDK tooling is absent
+  instead of reporting a successful skip.
+- Allowed SDK-configured clean builds to reach Gradle so `preBuild` can generate
+  the ignored local `Constants.java` before lint and debug assembly.
+- Added a behavioral build-gate regression and provisioned Android API 19 plus
+  build-tools 24.0.3 in hosted verification.
+
 ## 2026-06-17
 
 - Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.

@@ -68,9 +68,11 @@ starting the application because startup rejects unchanged placeholders.
 ## Testing and Verification
 
 - `make lint` - checks shell script syntax and runs the SDK-free Traveller baseline checks
-- `make test` - verifies idempotent constants generation and runs the
-  dependency-free JVM test for Traveller task-description behavior
-- `make build` - runs legacy Traveller Android lint and debug APK assembly when Android SDK configuration and local constants are present; otherwise it reports a skip
+- `make test` - verifies the fail-closed build gate, idempotent constants
+  generation, and dependency-free JVM behavior for task-description normalization
+- `make build` - requires an Android SDK, then runs legacy Traveller Android
+  lint and debug APK assembly; Gradle creates missing local placeholder constants
+  through `preBuild`, and unavailable SDK tooling fails the gate
 - `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
 - `scripts/test-constants-generation.sh` - verifies placeholder creation and
@@ -80,10 +82,11 @@ starting the application because startup rejects unchanged placeholders.
 - The task-description behavior test compiles only the pure normalizer and its
   test into a temporary directory; it does not require Android or Parse.
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
-- GitHub Actions runs the same root `make check` gate through
+- GitHub Actions provisions Android API 19 and build-tools 24.0.3, then runs the
+  same root `make check` gate through
   `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
   pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
-  superseded-run cancellation, and a five-minute timeout.
+  superseded-run cancellation, and a 15-minute timeout.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 

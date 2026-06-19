@@ -19,7 +19,7 @@
 - Lint/static checks: `make lint`
 - Tests: `make test`
 - Build: `make build`
-- If a command above skips because a platform toolchain is missing, verify on a machine with that SDK before claiming platform behavior is tested.
+- `make build` and `make check` fail closed when the Android SDK is unavailable; verify on a machine with that SDK before claiming platform behavior is tested.
 
 ## Coding conventions
 
@@ -27,8 +27,8 @@
 
 ## Testing guidance
 
-- Keep `make test` executing the dependency-free task-description behavior
-  test without Android SDK or Parse dependencies.
+- Keep `make test` executing the dependency-free build-gate, constants, and
+  task-description behavior tests without Android or Parse dependencies.
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 

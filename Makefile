@@ -1,7 +1,6 @@
 .PHONY: build check lint test verify
 
 override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-TRAVELLER_CONSTANTS := $(ROOT)traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java
 
 check: verify
 
@@ -11,14 +10,14 @@ lint:
 	$(ROOT)scripts/check-baseline.sh
 
 test:
+	$(ROOT)scripts/test-build-gate.sh
 	$(ROOT)scripts/test-constants-generation.sh
 	$(ROOT)scripts/test-task-description-normalizer.sh
 
 build:
 	@if [ -z "$${ANDROID_HOME}$${ANDROID_SDK_ROOT}" ]; then \
-		echo "Android SDK not configured; skipping Traveller Gradle build"; \
-	elif [ ! -f "$(TRAVELLER_CONSTANTS)" ]; then \
-		echo "Traveller Constants.java not configured; skipping Traveller Gradle build"; \
+		echo "Android SDK not configured; refusing to skip Traveller Gradle build" >&2; \
+		exit 1; \
 	else \
 		cd $(ROOT)traveller-android-app && ./gradlew lint assembleDebug --no-daemon; \
 	fi
