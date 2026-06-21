@@ -149,6 +149,18 @@ require_contains "traveller-android-app/traveller/build.gradle" \
   "buildToolsVersion \"26.0.2\"" \
   "Android build-tools must stay pinned to 26.0.2."
 require_contains "traveller-android-app/traveller/build.gradle" \
+  "compileSdkVersion 19" \
+  "Traveller compile SDK must stay pinned to the legacy API 19 boundary."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "targetSdkVersion 19" \
+  "Traveller target SDK must stay pinned to the legacy API 19 runtime boundary."
+require_contains "traveller-android-app/gradle.properties" \
+  "android.enableAapt2=false" \
+  "Traveller must keep the legacy AAPT path for appcompat-v7 19.1.0 resource linking."
+require_absent "traveller-android-app/gradle.properties" \
+  "android.enableAapt2=true" \
+  "Traveller must not re-enable AAPT2 for appcompat-v7 19.1.0 resource linking."
+require_contains "traveller-android-app/traveller/build.gradle" \
   "task generateConstants(type: Exec)" \
   "Traveller Gradle build must define generateConstants."
 require_contains "traveller-android-app/traveller/build.gradle" \
@@ -1085,6 +1097,12 @@ require_contains ".github/workflows/check.yml" \
 require_contains ".github/workflows/check.yml" \
   "platforms;android-19" \
   "GitHub Actions workflow must provision the pinned Android platform."
+workflow_platform_packages=$(grep -Eo 'platforms;android-[0-9]+' \
+  "$ROOT_DIR/.github/workflows/check.yml" | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+if [ "$workflow_platform_packages" != "platforms;android-19" ]; then
+  printf '%s\n' "GitHub Actions workflow must provision only Android API 19; found: $workflow_platform_packages" >&2
+  exit 1
+fi
 require_contains ".github/workflows/check.yml" \
   "build-tools;26.0.2" \
   "GitHub Actions workflow must provision the pinned Android build tools."

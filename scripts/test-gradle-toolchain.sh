@@ -5,6 +5,8 @@ ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 WORKFLOW_FILE="$ROOT_DIR/.github/workflows/check.yml"
 WRAPPER_FILE="$ROOT_DIR/traveller-android-app/gradle/wrapper/gradle-wrapper.properties"
 ROOT_BUILD_FILE="$ROOT_DIR/traveller-android-app/build.gradle"
+APP_BUILD_FILE="$ROOT_DIR/traveller-android-app/traveller/build.gradle"
+GRADLE_PROPERTIES="$ROOT_DIR/traveller-android-app/gradle.properties"
 
 require_file() {
   if [ ! -f "$1" ]; then
@@ -38,6 +40,8 @@ require_absent() {
 require_file "$WORKFLOW_FILE"
 require_file "$WRAPPER_FILE"
 require_file "$ROOT_BUILD_FILE"
+require_file "$APP_BUILD_FILE"
+require_file "$GRADLE_PROPERTIES"
 
 require_contains "$WRAPPER_FILE" \
   "distributionUrl=https\\://services.gradle.org/distributions/gradle-4.1-all.zip" \
@@ -54,6 +58,18 @@ require_contains "$ROOT_BUILD_FILE" \
 require_absent "$ROOT_BUILD_FILE" \
   "com.android.tools.build:gradle:0.8.3" \
   "Hosted Traveller validation must not use the Java 7/TLS-failing Android Gradle Plugin 0.8.3 baseline."
+require_contains "$APP_BUILD_FILE" \
+  "compileSdkVersion 19" \
+  "Traveller must keep the legacy compile SDK 19 contract."
+require_contains "$APP_BUILD_FILE" \
+  "targetSdkVersion 19" \
+  "Traveller must keep the legacy target SDK 19 runtime contract."
+require_contains "$GRADLE_PROPERTIES" \
+  "android.enableAapt2=false" \
+  "Traveller must use the AGP 3.0.1 legacy AAPT path for appcompat-v7 19.1.0 resource linking."
+require_absent "$GRADLE_PROPERTIES" \
+  "android.enableAapt2=true" \
+  "Traveller must not re-enable AAPT2 for appcompat-v7 19.1.0 resource linking."
 
 if grep -Fq "gradle-4.1-all.zip" "$WRAPPER_FILE" &&
   grep -Fq "java-version: '7'" "$WORKFLOW_FILE"; then
@@ -73,5 +89,13 @@ require_contains "$WORKFLOW_FILE" \
 require_absent "$WORKFLOW_FILE" \
   "java-version: '7'" \
   "GitHub Actions workflow must not retain the Java 7 TLS-failing gate."
+require_contains "$WORKFLOW_FILE" \
+  '"$sdkmanager" '\''platforms;android-19'\'' '\''build-tools;26.0.2'\''' \
+  "GitHub Actions workflow must provision exactly Android API 19 plus build-tools 26.0.2."
+platform_packages=$(grep -Eo 'platforms;android-[0-9]+' "$WORKFLOW_FILE" | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+if [ "$platform_packages" != "platforms;android-19" ]; then
+  printf '%s\n' "GitHub Actions workflow must provision only Android API 19; found: $platform_packages" >&2
+  exit 1
+fi
 
 printf '%s\n' "Traveller Gradle toolchain workflow checks passed."

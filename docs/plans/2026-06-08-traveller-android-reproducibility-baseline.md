@@ -15,7 +15,7 @@ Raise the engineering baseline for the legacy Traveller Android app by making de
 
 ## Problem Frame
 
-The repository is a 2014-era Android project with a legacy Parse 1.5.0 app and an intentionally narrow build-system baseline. The baseline originally used Gradle 1.10 and Android Gradle Plugin 0.8.x; hosted Java 7 later failed modern HTTPS dependency authentication, so the maintained baseline now uses Java 8, Gradle 4.1, Android Gradle Plugin 3.0.1, Google Maven before Maven Central, and build-tools 26.0.2 while preserving app source behavior.
+The repository is a 2014-era Android project with a legacy Parse 1.5.0 app and an intentionally narrow build-system baseline. The baseline originally used Gradle 1.10 and Android Gradle Plugin 0.8.x; hosted Java 7 later failed modern HTTPS dependency authentication, so the maintained baseline now uses Java 8, Gradle 4.1, Android Gradle Plugin 3.0.1, Google Maven before Maven Central, API 19, build-tools 26.0.2, and AGP 3.0.1's legacy AAPT path while preserving app source behavior.
 
 ---
 
@@ -36,6 +36,7 @@ The repository is a 2014-era Android project with a legacy Parse 1.5.0 app and a
 
 - **Pin only the legacy app coordinates:** Keep compile and target SDK 19, appcompat 19.1.0, and Parse 1.5.0 fixed while modernizing only the minimum build-system layer needed for hosted HTTPS.
 - **Use a host-compatible build-tools pin:** Use build-tools 26.0.2 with Android Gradle Plugin 3.0.1 while compile and target SDK remain at 19.
+- **Keep the legacy resource linker for appcompat:** Disable AGP 3.0.1 AAPT2 because appcompat-v7 19.1.0 declares the private framework `preserveIconSpacing` styleable; the compile SDK and target SDK stay at API 19 rather than broadening the app runtime boundary.
 - **Use maintained HTTPS repositories:** Resolve Android artifacts from Google Maven before Maven Central, with no JCenter or insecure HTTP fallback.
 - **Keep Parse secrets out of git:** Provide `Constants.java.example` and keep real `Constants.java` ignored.
 - **Add SDK-free checks:** A shell script can validate pinned dependency declarations and required template/docs even when `./gradlew` cannot configure without a compatible Android SDK.
@@ -65,9 +66,13 @@ The repository is a 2014-era Android project with a legacy Parse 1.5.0 app and a
   - `traveller-android-app/build.gradle` declares `google()` before `mavenCentral()` in both repository blocks.
   - `traveller-android-app/build.gradle` does not use `repo1.maven.org`,
     insecure HTTP, JCenter, or ad hoc repository URLs.
+  - `traveller-android-app/traveller/build.gradle` keeps compile SDK 19 and
+    target SDK 19.
   - `traveller-android-app/traveller/build.gradle` no longer contains `appcompat-v7:+`.
   - `traveller-android-app/traveller/build.gradle` pins build-tools 26.0.2.
   - `traveller-android-app/traveller/build.gradle` uses `com.android.application`, `minifyEnabled`, and `implementation`.
+  - `traveller-android-app/gradle.properties` disables AAPT2 for the legacy
+    appcompat resource-linking boundary.
   - `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` uses the Gradle 4.1 all.zip HTTPS distribution URL and checksum.
 - **Verification:** `scripts/check-baseline.sh`, `cd traveller-android-app && ./gradlew tasks --no-daemon`
 
@@ -113,6 +118,8 @@ The repository is a 2014-era Android project with a legacy Parse 1.5.0 app and a
 ## Risks & Dependencies
 
 - Android Gradle Plugin 3.0.1, Gradle 4.1, appcompat 19.x, and Parse 1.5.0 are obsolete and may require exact hosted SDK/JDK combinations.
+- Re-enabling AAPT2, raising compile SDK, or replacing appcompat should be
+  treated as a separate modernization pass with Android runtime verification.
 - Local Android verification is expected to fail in this environment until `ANDROID_HOME` or `local.properties` points at a compatible SDK.
 - The app currently depends on a local `Constants.java` file for Parse credentials; the template improves setup clarity but intentionally does not make the app runnable without real credentials.
 

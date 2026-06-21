@@ -43,7 +43,8 @@
 ## Safety and gotchas
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
-- Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
+- Traveller is pinned to Android API 19, target SDK 19, build-tools 26.0.2, and
+  AGP 3.0.1's legacy AAPT path for this legacy baseline.
 - Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
   `Constants.java.example` only when the local file is missing. Replace the
   placeholder Parse values locally; `Constants.java` must stay ignored.

@@ -83,7 +83,9 @@ starting the application because startup rejects unchanged placeholders.
 - `scripts/test-constants-generation.sh` - verifies placeholder creation and
   proves existing local credentials are not overwritten
 - `scripts/test-gradle-toolchain.sh` - verifies the hosted workflow pairs the
-  Gradle 4.1 wrapper and Android Gradle Plugin 3.0.1 with Java 8
+  Gradle 4.1 wrapper and Android Gradle Plugin 3.0.1 with Java 8, Android API
+  19, build-tools 26.0.2, and the legacy AAPT resource compiler required by
+  appcompat-v7 19.1.0
 - `scripts/test-gradle-dependency-resolution.sh` - verifies the Gradle source
   resolves Android artifacts from Google Maven before Maven Central, without
   JCenter, insecure HTTP, or hosted Java 7 peer-auth-failing endpoints
@@ -105,7 +107,10 @@ starting the application because startup rejects unchanged placeholders.
   authentication step are outside that first-command boundary. After
   authentication, GitHub Actions sets up Zulu Java 8, provisions Android API 19
   and build-tools 26.0.2, resolves Android Gradle Plugin 3.0.1 and appcompat
-  19.1.0 from Google Maven before Maven Central, then runs the same root
+  19.1.0 from Google Maven before Maven Central, keeps
+  `compileSdkVersion 19` and `targetSdkVersion 19`, disables AGP 3.0.1 AAPT2
+  because that resource linker rejects a private framework attr declared by
+  appcompat-v7 19.1.0, then runs the same root
   `make check` gate through
   `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
   pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
@@ -121,7 +126,7 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
 ## Configuration and Secrets
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
-- Traveller is pinned to Android build-tools 26.0.2 for this legacy baseline.
+- Traveller is pinned to Android API 19, target SDK 19, and Android build-tools 26.0.2 for this legacy baseline.
 - Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
   `Constants.java.example` only when the local file is missing. Replace the
   placeholder Parse values locally; `Constants.java` must stay ignored.

@@ -24,6 +24,9 @@
 - Updated the authenticated Gradle wrapper launcher, generated wrapper jar, and
   properties digests using bounded Gradle 4.1 provenance, including the official
   all.zip distribution checksum.
+- Kept Traveller on compile/target SDK 19 and disabled AGP 3.0.1 AAPT2 so
+  appcompat-v7 19.1.0 can link its legacy framework-styleable resources without
+  changing app runtime SDK behavior.
 
 ## 2026-06-17
 
