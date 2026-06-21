@@ -7,6 +7,7 @@ check: verify
 lint:
 	sh -n $(ROOT)scripts/check-baseline.sh
 	sh -n $(ROOT)scripts/prepare-traveller-constants.sh
+	sh -n $(ROOT)scripts/test-gradle-dependency-resolution.sh
 	sh -n $(ROOT)scripts/verify-gradle-wrapper.sh
 	$(ROOT)scripts/verify-gradle-wrapper.sh
 	$(ROOT)scripts/check-baseline.sh
@@ -14,6 +15,7 @@ lint:
 test:
 	$(ROOT)scripts/test-build-gate.sh
 	$(ROOT)scripts/test-constants-generation.sh
+	$(ROOT)scripts/test-gradle-dependency-resolution.sh
 	$(ROOT)scripts/test-gradle-toolchain.sh
 	$(ROOT)scripts/test-gradle-wrapper-authentication.sh
 	$(ROOT)scripts/test-task-description-normalizer.sh

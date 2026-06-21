@@ -84,9 +84,18 @@ require_contains "traveller-android-app/build.gradle" \
 require_absent "traveller-android-app/build.gradle" \
   "com.android.tools.build:gradle:0.8.+" \
   "Android Gradle Plugin must not use a dynamic version."
+require_absent "traveller-android-app/build.gradle" \
+  "repo1.maven.org" \
+  "Maven Central repositories must not use the hosted Java 7 peer-auth-failing repo1 endpoint."
+require_absent "traveller-android-app/build.gradle" \
+  "http://" \
+  "Maven Central repositories must not use insecure HTTP."
+require_absent "traveller-android-app/build.gradle" \
+  "mavenCentral()" \
+  "Gradle 1.10 must not hide Maven Central transport behind mavenCentral()."
 require_contains "traveller-android-app/build.gradle" \
-  "url 'https://repo1.maven.org/maven2'" \
-  "Maven Central repositories must use HTTPS."
+  "url 'https://repo.maven.apache.org/maven2'" \
+  "Maven Central repositories must use the canonical HTTPS endpoint."
 
 require_contains "traveller-android-app/traveller/build.gradle" \
   "buildToolsVersion \"24.0.3\"" \
@@ -230,6 +239,10 @@ if [ ! -x "$ROOT_DIR/scripts/test-constants-generation.sh" ]; then
 fi
 if [ ! -x "$ROOT_DIR/scripts/test-gradle-toolchain.sh" ]; then
   printf '%s\n' "Traveller Gradle toolchain test is missing or not executable." >&2
+  exit 1
+fi
+if [ ! -x "$ROOT_DIR/scripts/test-gradle-dependency-resolution.sh" ]; then
+  printf '%s\n' "Traveller Gradle dependency-resolution test is missing or not executable." >&2
   exit 1
 fi
 if [ ! -x "$ROOT_DIR/scripts/test-gradle-wrapper-authentication.sh" ]; then
@@ -920,6 +933,9 @@ require_contains "Makefile" \
   '$(ROOT)scripts/test-gradle-toolchain.sh' \
   "Makefile test must run the Gradle/JDK workflow contract."
 require_contains "Makefile" \
+  '$(ROOT)scripts/test-gradle-dependency-resolution.sh' \
+  "Makefile test must run the Gradle dependency-resolution contract."
+require_contains "Makefile" \
   '$(ROOT)scripts/test-gradle-wrapper-authentication.sh' \
   "Makefile test must run the Gradle wrapper authentication mutation contract."
 for required_path in \
@@ -1048,6 +1064,10 @@ if [ "$(grep -Fc '$(ROOT)scripts/test-constants-generation.sh' "$ROOT_DIR/Makefi
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-gradle-toolchain.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
   printf '%s\n' "The Gradle toolchain test must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-gradle-dependency-resolution.sh' "$ROOT_DIR/Makefile")" -ne 2 ]; then
+  printf '%s\n' "The Gradle dependency-resolution test must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-gradle-wrapper-authentication.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then

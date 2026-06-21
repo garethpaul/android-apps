@@ -84,6 +84,10 @@ starting the application because startup rejects unchanged placeholders.
   proves existing local credentials are not overwritten
 - `scripts/test-gradle-toolchain.sh` - verifies the hosted workflow pairs the
   Gradle 1.10 wrapper and Android Gradle Plugin 0.8.3 with Java 7
+- `scripts/test-gradle-dependency-resolution.sh` - verifies the Gradle source
+  uses the canonical HTTPS Maven Central endpoint instead of the hosted
+  Java 7 peer-auth-failing `repo1.maven.org` endpoint or ambiguous
+  `mavenCentral()` shorthand
 - `scripts/test-gradle-wrapper-authentication.sh` - mutates `gradlew`, the
   wrapper jar, and wrapper properties to verify wrapper authentication rejects
   replacements and restorations before Gradle execution
@@ -101,7 +105,9 @@ starting the application because startup rejects unchanged placeholders.
   local filesystem changes that replace wrapper files after the inline hosted
   authentication step are outside that first-command boundary. After
   authentication, GitHub Actions sets up Zulu Java 7, provisions Android API 19
-  and build-tools 24.0.3, then runs the same root `make check` gate through
+  and build-tools 24.0.3, resolves Gradle dependencies from
+  `https://repo.maven.apache.org/maven2`, then runs the same root `make check`
+  gate through
   `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
   pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
   superseded-run cancellation, and a 15-minute timeout.

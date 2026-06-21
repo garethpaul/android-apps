@@ -14,6 +14,10 @@
   mutation coverage for launcher, wrapper jar, and wrapper properties changes.
 - Corrected the build-gate regression to model hosted `JAVA_HOME` selection and
   clarified that wrapper authentication covers initial checkout bytes.
+- Switched Traveller Gradle dependency resolution to Maven Central's canonical
+  HTTPS endpoint after hosted Java 7 Gradle 1.10 failed peer authentication
+  against `repo1.maven.org`, with a contract rejecting `repo1` and ambiguous
+  `mavenCentral()` resolution.
 
 ## 2026-06-17
 

@@ -63,7 +63,9 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 - **Test Scenarios:**
   - `traveller-android-app/gradlew` is executable.
   - `traveller-android-app/build.gradle` no longer contains `com.android.tools.build:gradle:0.8.+`.
-  - `traveller-android-app/build.gradle` uses an HTTPS Maven Central URL.
+  - `traveller-android-app/build.gradle` uses Maven Central's canonical HTTPS URL.
+  - `traveller-android-app/build.gradle` does not use `repo1.maven.org`,
+    insecure HTTP, or Gradle 1.10's ambiguous `mavenCentral()` shorthand.
   - `traveller-android-app/traveller/build.gradle` no longer contains `appcompat-v7:+`.
   - `traveller-android-app/traveller/build.gradle` pins build-tools 24.0.3.
   - `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` uses an HTTPS distribution URL.
