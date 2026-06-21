@@ -92,6 +92,15 @@ require_contains "traveller-android-app/traveller/build.gradle" \
   "buildToolsVersion \"24.0.3\"" \
   "Android build-tools must stay pinned to 24.0.3."
 require_contains "traveller-android-app/traveller/build.gradle" \
+  "task generateConstants(type: Exec)" \
+  "Traveller Gradle build must define generateConstants."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "commandLine 'sh', new File(rootDir, '../scripts/prepare-traveller-constants.sh').canonicalPath" \
+  "generateConstants must delegate to the idempotent repository helper."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "preBuild.dependsOn generateConstants" \
+  "Traveller preBuild must generate missing local constants."
+require_contains "traveller-android-app/traveller/build.gradle" \
   "com.android.support:appcompat-v7:19.1.0" \
   "appcompat must stay pinned to 19.1.0."
 require_absent "traveller-android-app/traveller/build.gradle" \
@@ -205,6 +214,14 @@ fi
 
 if [ ! -x "$ROOT_DIR/scripts/prepare-traveller-constants.sh" ]; then
   printf '%s\n' "Traveller constants preparation helper is missing or not executable." >&2
+  exit 1
+fi
+if [ ! -x "$ROOT_DIR/scripts/test-build-gate.sh" ]; then
+  printf '%s\n' "Traveller build-gate regression is missing or not executable." >&2
+  exit 1
+fi
+if [ ! -x "$ROOT_DIR/scripts/test-constants-generation.sh" ]; then
+  printf '%s\n' "Traveller constants generation test is missing or not executable." >&2
   exit 1
 fi
 
@@ -881,6 +898,12 @@ require_contains "Makefile" \
 require_contains "Makefile" \
   '$(ROOT)scripts/test-task-description-normalizer.sh' \
   "Makefile test must run the dependency-free task-description JVM test."
+require_contains "Makefile" \
+  '$(ROOT)scripts/test-build-gate.sh' \
+  "Makefile test must run the fail-closed Android build-gate regression."
+require_contains "Makefile" \
+  '$(ROOT)scripts/test-constants-generation.sh' \
+  "Makefile test must run the Traveller constants generation regression."
 for required_path in \
   "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
   "docs/plans/2026-06-17-traveller-unicode-task-whitespace.md" \
@@ -932,8 +955,17 @@ require_contains ".github/workflows/check.yml" \
   "contents: read" \
   "GitHub Actions workflow permissions must be read-only."
 require_contains ".github/workflows/check.yml" \
-  "timeout-minutes: 5" \
+  "timeout-minutes: 15" \
   "GitHub Actions workflow must have a bounded timeout."
+require_contains ".github/workflows/check.yml" \
+  "platforms;android-19" \
+  "GitHub Actions workflow must provision the pinned Android platform."
+require_contains ".github/workflows/check.yml" \
+  "build-tools;24.0.3" \
+  "GitHub Actions workflow must provision the pinned Android build tools."
+require_contains ".github/workflows/check.yml" \
+  'ANDROID_SDK_ROOT=$ANDROID_HOME' \
+  "GitHub Actions workflow must export the configured Android SDK root."
 require_contains ".github/workflows/check.yml" \
   "runs-on: ubuntu-24.04" \
   "GitHub Actions workflow must use a fixed Ubuntu runner image."
@@ -949,15 +981,29 @@ require_contains ".github/workflows/check.yml" \
 require_exact_line "Makefile" \
   'override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))' \
   "Makefile must protect repository paths from command-line overrides."
-require_exact_line "Makefile" \
-  'TRAVELLER_CONSTANTS := $(ROOT)traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java' \
-  "Makefile must derive Traveller constants from the protected repository root."
+require_contains "Makefile" \
+  "Android SDK not configured; refusing to skip Traveller Gradle build" \
+  "Makefile must fail closed when the Android SDK is unavailable."
+require_absent "Makefile" \
+  "Traveller Constants.java not configured; skipping Traveller Gradle build" \
+  "Makefile must let Gradle generate missing Traveller constants."
+require_contains "Makefile" \
+  "./gradlew lint assembleDebug --no-daemon" \
+  "Makefile must execute Android lint and debug assembly."
 if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 2 ]; then
   printf '%s\n' "Both baseline commands must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-task-description-normalizer.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
   printf '%s\n' "The JVM behavior test must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-build-gate.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The build-gate regression must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-constants-generation.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The constants generation test must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/prepare-traveller-constants.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then

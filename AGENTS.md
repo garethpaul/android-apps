@@ -19,7 +19,7 @@
 - Lint/static checks: `make lint`
 - Tests: `make test`
 - Build: `make build`
-- If a command above skips because a platform toolchain is missing, verify on a machine with that SDK before claiming platform behavior is tested.
+- `make build` and `make check` fail closed when the Android SDK is unavailable; verify on a machine with that SDK before claiming platform behavior is tested.
 
 ## Coding conventions
 
@@ -27,8 +27,8 @@
 
 ## Testing guidance
 
-- Keep `make test` executing the dependency-free task-description behavior
-  test without Android SDK or Parse dependencies.
+- Keep `make test` executing the dependency-free build-gate, constants, and
+  task-description behavior tests without Android or Parse dependencies.
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 
@@ -43,7 +43,9 @@
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
 - Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
-- Copy `Constants.java.example` with `scripts/prepare-traveller-constants.sh`, then replace placeholder Parse values locally. `Constants.java` must stay ignored.
+- Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
+  `Constants.java.example` only when the local file is missing. Replace the
+  placeholder Parse values locally; `Constants.java` must stay ignored.
 - Traveller trims task descriptions and rejects whitespace-only entries before saving Parse `Item` records.
 - Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Traveller treats a missing task input view as an empty description so stale layouts do not crash task creation.
