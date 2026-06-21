@@ -224,6 +224,10 @@ if [ ! -x "$ROOT_DIR/scripts/test-constants-generation.sh" ]; then
   printf '%s\n' "Traveller constants generation test is missing or not executable." >&2
   exit 1
 fi
+if [ ! -x "$ROOT_DIR/scripts/test-gradle-toolchain.sh" ]; then
+  printf '%s\n' "Traveller Gradle toolchain test is missing or not executable." >&2
+  exit 1
+fi
 
 require_absent "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/ItemAdapter.java" \
   "inflate(R.layout.item_row_item, null)" \
@@ -904,6 +908,9 @@ require_contains "Makefile" \
 require_contains "Makefile" \
   '$(ROOT)scripts/test-constants-generation.sh' \
   "Makefile test must run the Traveller constants generation regression."
+require_contains "Makefile" \
+  '$(ROOT)scripts/test-gradle-toolchain.sh' \
+  "Makefile test must run the Gradle/JDK workflow contract."
 for required_path in \
   "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
   "docs/plans/2026-06-17-traveller-unicode-task-whitespace.md" \
@@ -940,11 +947,17 @@ require_contains ".github/workflows/check.yml" \
   "actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00" \
   "GitHub Actions workflow must pin Java setup to an immutable revision."
 require_contains ".github/workflows/check.yml" \
-  "distribution: temurin" \
-  "GitHub Actions workflow must select the Temurin JDK distribution."
+  "distribution: zulu" \
+  "GitHub Actions workflow must select a Java 7-capable JDK distribution."
 require_contains ".github/workflows/check.yml" \
+  "java-version: '7'" \
+  "GitHub Actions workflow must run the Gradle 1.10-compatible Java 7 gate."
+require_absent ".github/workflows/check.yml" \
+  "distribution: temurin" \
+  "Temurin must not be used for the Java 7 Gradle 1.10 gate."
+require_absent ".github/workflows/check.yml" \
   "java-version: '8'" \
-  "GitHub Actions workflow must run the legacy-compatible Java 8 test gate."
+  "Gradle 1.10 must not run under Java 8."
 require_absent ".github/workflows/check.yml" \
   "branches:" \
   "GitHub Actions push checks must cover feature branches."
@@ -1004,6 +1017,10 @@ if [ "$(grep -Fc '$(ROOT)scripts/test-build-gate.sh' "$ROOT_DIR/Makefile")" -ne 
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/test-constants-generation.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
   printf '%s\n' "The constants generation test must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-gradle-toolchain.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The Gradle toolchain test must use the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc '$(ROOT)scripts/prepare-traveller-constants.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then

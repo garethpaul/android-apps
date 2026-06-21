@@ -12,6 +12,7 @@ lint:
 test:
 	$(ROOT)scripts/test-build-gate.sh
 	$(ROOT)scripts/test-constants-generation.sh
+	$(ROOT)scripts/test-gradle-toolchain.sh
 	$(ROOT)scripts/test-task-description-normalizer.sh
 
 build:
