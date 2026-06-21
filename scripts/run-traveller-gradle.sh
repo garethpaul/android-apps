@@ -24,6 +24,11 @@ if grep -Fq "OutOfMemoryError" "$LOG_FILE"; then
   exit 1
 fi
 
+if grep -Fq "Unexpected failure during lint analysis" "$LOG_FILE"; then
+  printf '%s\n' "Android lint reported an internal infrastructure failure." >&2
+  exit 1
+fi
+
 if [ ! -s "$LINT_REPORT" ]; then
   printf '%s\n' "Android lint did not produce a nonempty lint-results.html report." >&2
   exit 1

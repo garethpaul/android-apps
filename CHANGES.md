@@ -27,9 +27,9 @@
 - Kept Traveller on compile/target SDK 19 and disabled AGP 3.0.1 AAPT2 so
   appcompat-v7 19.1.0 can link its legacy framework-styleable resources without
   changing app runtime SDK behavior.
-- Made the Android build gate reject zero-exit lint out-of-memory failures and
-  missing fresh lint reports, with a bounded 2 GiB Gradle heap and an SDK-free
-  regression for the hosted false-green failure mode.
+- Made the Android build gate reject zero-exit lint out-of-memory and generic
+  internal failures plus missing fresh lint reports, with a bounded 2 GiB
+  Gradle heap and SDK-free regressions for the hosted false-green failure mode.
 
 ## 2026-06-17
 

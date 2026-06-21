@@ -1183,6 +1183,9 @@ require_contains "scripts/run-traveller-gradle.sh" \
   "OutOfMemoryError" \
   "Traveller Gradle wrapper must reject lint out-of-memory failures."
 require_contains "scripts/run-traveller-gradle.sh" \
+  "Unexpected failure during lint analysis" \
+  "Traveller Gradle wrapper must reject generic lint infrastructure failures."
+require_contains "scripts/run-traveller-gradle.sh" \
   "lint-results.html" \
   "Traveller Gradle wrapper must require a fresh lint report."
 require_exact_line "docs/plans/2026-06-14-traveller-make-root-override-protection.md" \

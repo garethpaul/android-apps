@@ -76,8 +76,9 @@ security-sensitive supply-chain changes; the Make verifier mirrors that check
 for local drift detection but is not the hosted security boundary for
 pull-request-authored code or caller-supplied post-auth wrapper replacement.
 The SDK-backed Make gate also captures the legacy Gradle run and rejects lint
-out-of-memory output or a missing fresh lint report, rather than trusting a zero
-exit from Android Gradle Plugin 3.0.1 after an internal lint failure.
+out-of-memory output, the generic internal lint failure marker, or a missing
+fresh lint report, rather than trusting a zero exit from Android Gradle Plugin
+3.0.1 after an internal lint failure.
 
 ## Safe Research Guidelines
 

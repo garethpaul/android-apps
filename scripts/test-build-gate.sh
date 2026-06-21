@@ -50,6 +50,18 @@ if [ "${TRAVELLER_FAKE_LINT_OOM:-}" = "1" ]; then
   exit 0
 fi
 
+if [ "${TRAVELLER_FAKE_LINT_INTERNAL_FAILURE:-}" = "1" ]; then
+  mkdir -p traveller/build/reports
+  printf '%s\n' '<html><body>partial lint report</body></html>' > traveller/build/reports/lint-results.html
+  printf '%s\n' "Unexpected failure during lint analysis of null" >&2
+  exit 0
+fi
+
+if [ "${TRAVELLER_FAKE_LINT_NO_REPORT:-}" = "1" ]; then
+  printf '%s\n' "BUILD SUCCESSFUL without a lint report"
+  exit 0
+fi
+
 sh ../scripts/prepare-traveller-constants.sh >/dev/null
 mkdir -p traveller/build/reports
 printf '%s\n' '<html><body>lint complete</body></html>' > traveller/build/reports/lint-results.html
@@ -96,6 +108,28 @@ fi
 if ! printf '%s\n' "$oom_output" | grep -Fq "OutOfMemoryError"; then
   printf '%s\n' "Build gate must preserve the Android lint infrastructure failure in its output." >&2
   printf '%s\n' "$oom_output" >&2
+  exit 1
+fi
+
+if internal_output=$(TRAVELLER_FAKE_LINT_INTERNAL_FAILURE=1 JAVA_HOME="$FAKE_JDK" ANDROID_SDK_ROOT="$TEMP_ROOT/android-sdk" make -f "$TEMP_ROOT/Makefile" build 2>&1); then
+  printf '%s\n' "Build gate must fail closed when Android lint reports an internal infrastructure failure." >&2
+  printf '%s\n' "$internal_output" >&2
+  exit 1
+fi
+if ! printf '%s\n' "$internal_output" | grep -Fq "Unexpected failure during lint analysis"; then
+  printf '%s\n' "Build gate must preserve the Android lint internal failure in its output." >&2
+  printf '%s\n' "$internal_output" >&2
+  exit 1
+fi
+
+if missing_report_output=$(TRAVELLER_FAKE_LINT_NO_REPORT=1 JAVA_HOME="$FAKE_JDK" ANDROID_SDK_ROOT="$TEMP_ROOT/android-sdk" make -f "$TEMP_ROOT/Makefile" build 2>&1); then
+  printf '%s\n' "Build gate must fail closed when Android lint produces no fresh report." >&2
+  printf '%s\n' "$missing_report_output" >&2
+  exit 1
+fi
+if ! printf '%s\n' "$missing_report_output" | grep -Fq "did not produce a nonempty lint-results.html report"; then
+  printf '%s\n' "Build gate must report the missing fresh Android lint report." >&2
+  printf '%s\n' "$missing_report_output" >&2
   exit 1
 fi
 
