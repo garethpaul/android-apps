@@ -79,11 +79,14 @@ for plan_contract in \
 done
 
 require_contains "traveller-android-app/build.gradle" \
-  "com.android.tools.build:gradle:0.8.3" \
-  "Android Gradle Plugin must stay pinned to 0.8.3."
+  "com.android.tools.build:gradle:3.0.1" \
+  "Android Gradle Plugin must stay pinned to 3.0.1."
 require_absent "traveller-android-app/build.gradle" \
   "com.android.tools.build:gradle:0.8.+" \
   "Android Gradle Plugin must not use a dynamic version."
+require_absent "traveller-android-app/build.gradle" \
+  "com.android.tools.build:gradle:0.8.3" \
+  "Android Gradle Plugin must not use the Java 7/TLS-failing 0.8.3 baseline."
 require_absent "traveller-android-app/build.gradle" \
   "repo1.maven.org" \
   "Maven Central repositories must not use the hosted Java 7 peer-auth-failing repo1 endpoint."
@@ -91,15 +94,60 @@ require_absent "traveller-android-app/build.gradle" \
   "http://" \
   "Maven Central repositories must not use insecure HTTP."
 require_absent "traveller-android-app/build.gradle" \
-  "mavenCentral()" \
-  "Gradle 1.10 must not hide Maven Central transport behind mavenCentral()."
+  "repo.maven.apache.org" \
+  "AGP 3.0.1 and appcompat 19.1.0 must resolve from Google Maven before Maven Central."
+require_absent "traveller-android-app/build.gradle" \
+  "jcenter()" \
+  "Traveller Gradle dependency resolution must not depend on JCenter."
+require_absent "traveller-android-app/build.gradle" \
+  "maven { url" \
+  "Traveller Gradle dependency resolution should use built-in HTTPS repositories."
 require_contains "traveller-android-app/build.gradle" \
-  "url 'https://repo.maven.apache.org/maven2'" \
-  "Maven Central repositories must use the canonical HTTPS endpoint."
+  "google()" \
+  "Traveller Gradle dependency resolution must declare Google Maven."
+require_contains "traveller-android-app/build.gradle" \
+  "mavenCentral()" \
+  "Traveller Gradle dependency resolution must keep Maven Central."
+if [ "$(grep -Fc 'google()' "$ROOT_DIR/traveller-android-app/build.gradle")" -ne 2 ] ||
+  [ "$(grep -Fc 'mavenCentral()' "$ROOT_DIR/traveller-android-app/build.gradle")" -ne 2 ]; then
+  printf '%s\n' "Traveller must declare exactly two Google Maven and two Maven Central repositories." >&2
+  exit 1
+fi
+if ! awk '
+  /repositories[[:space:]]*\{/ {
+    in_repositories = 1
+    depth = 1
+    saw_google = 0
+    saw_maven = 0
+    next
+  }
+  in_repositories {
+    if (index($0, "{")) depth++
+    if (index($0, "}")) depth--
+    if (index($0, "mavenCentral()") && !saw_google) bad = 1
+    if (index($0, "google()")) saw_google = 1
+    if (index($0, "mavenCentral()")) saw_maven = 1
+    if (depth == 0) {
+      blocks++
+      if (!saw_google || !saw_maven) bad = 1
+      in_repositories = 0
+    }
+  }
+  END { exit !(blocks == 2 && !bad) }
+' "$ROOT_DIR/traveller-android-app/build.gradle"; then
+  printf '%s\n' "Traveller repositories must declare Google Maven before Maven Central in each repository block." >&2
+  exit 1
+fi
 
 require_contains "traveller-android-app/traveller/build.gradle" \
-  "buildToolsVersion \"24.0.3\"" \
-  "Android build-tools must stay pinned to 24.0.3."
+  "apply plugin: 'com.android.application'" \
+  "Traveller must use the AGP 3 application plugin id."
+require_absent "traveller-android-app/traveller/build.gradle" \
+  "apply plugin: 'android'" \
+  "Traveller must not use the removed legacy android plugin id."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "buildToolsVersion \"26.0.2\"" \
+  "Android build-tools must stay pinned to 26.0.2."
 require_contains "traveller-android-app/traveller/build.gradle" \
   "task generateConstants(type: Exec)" \
   "Traveller Gradle build must define generateConstants."
@@ -110,15 +158,39 @@ require_contains "traveller-android-app/traveller/build.gradle" \
   "preBuild.dependsOn generateConstants" \
   "Traveller preBuild must generate missing local constants."
 require_contains "traveller-android-app/traveller/build.gradle" \
+  "minifyEnabled false" \
+  "Traveller release build must use the AGP 3 minifyEnabled DSL."
+require_absent "traveller-android-app/traveller/build.gradle" \
+  "runProguard" \
+  "Traveller release build must not use the removed runProguard DSL."
+require_contains "traveller-android-app/traveller/build.gradle" \
   "com.android.support:appcompat-v7:19.1.0" \
   "appcompat must stay pinned to 19.1.0."
 require_absent "traveller-android-app/traveller/build.gradle" \
   "appcompat-v7:+" \
   "appcompat must not use a dynamic version."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "implementation 'com.android.support:appcompat-v7:19.1.0'" \
+  "Traveller must use the AGP 3 dependency DSL for appcompat."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "implementation fileTree(dir: 'libs', include: ['*.jar'])" \
+  "Traveller must use the AGP 3 dependency DSL for local jars."
+require_contains "traveller-android-app/traveller/build.gradle" \
+  "implementation files('libs/Parse-1.5.0.jar')" \
+  "Traveller must use the AGP 3 dependency DSL for the Parse jar."
+require_absent "traveller-android-app/traveller/build.gradle" \
+  "compile " \
+  "Traveller must not use the deprecated compile dependency DSL."
 
 require_contains "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" \
-  "distributionUrl=https\\://services.gradle.org/distributions/gradle-1.10-all.zip" \
-  "Gradle wrapper distribution must use HTTPS."
+  "distributionUrl=https\\://services.gradle.org/distributions/gradle-4.1-all.zip" \
+  "Gradle wrapper distribution must use the audited 4.1 all.zip HTTPS distribution."
+require_contains "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" \
+  "distributionSha256Sum=5c07b3bac2209fbc98fb1fdf6fd831f72429cdf8c503807404eae03d8c8099e5" \
+  "Gradle wrapper distribution checksum must match the official 4.1 all.zip sidecar."
+require_absent "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" \
+  "gradle-1.10-all.zip" \
+  "Gradle wrapper distribution must not retain the Java 7/TLS-failing 1.10 wrapper."
 require_absent "traveller-android-app/gradle/wrapper/gradle-wrapper.properties" \
   "distributionUrl=http\\://services.gradle.org" \
   "Gradle wrapper distribution must not use HTTP."
@@ -983,24 +1055,21 @@ require_contains ".github/workflows/check.yml" \
   "/usr/bin/sha256sum --strict --check <<'GRADLE_WRAPPER_SHA256'" \
   "GitHub Actions workflow must use strict absolute sha256sum wrapper authentication."
 for wrapper_digest in \
-  "874d75d37bf38c810a8314e0b2f78a3c77fce9437963ae33cec8543d92662b61  traveller-android-app/gradlew" \
-  "e2b82129ab64751fd40437007bd2f7f2afb3c6e41a9198e628650b22d5824a14  traveller-android-app/gradle/wrapper/gradle-wrapper.jar" \
-  "3938dfe4bc3a01a40bd2da0c099bbc863381ec24e5cf5e3f4adb556fe2bf4621  traveller-android-app/gradle/wrapper/gradle-wrapper.properties"; do
+  "cf139290d3b7334cc99b58ecb6adc549c59ecb8f1f4162b122ad4590ead7585e  traveller-android-app/gradlew" \
+  "f4d953f31fbf6c38a8c330d19171c8ba6e0d1ff59d4d5c5c2d3ed821c9f3d5a3  traveller-android-app/gradle/wrapper/gradle-wrapper.jar" \
+  "45971c7481b5fb9a3bc7345986390cf518d1d47803af4a0007e9201e4167c38c  traveller-android-app/gradle/wrapper/gradle-wrapper.properties"; do
   require_contains ".github/workflows/check.yml" "$wrapper_digest" \
     "GitHub Actions workflow must inline reviewed wrapper digest: $wrapper_digest"
 done
 require_contains ".github/workflows/check.yml" \
   "distribution: zulu" \
-  "GitHub Actions workflow must select a Java 7-capable JDK distribution."
+  "GitHub Actions workflow must keep the pinned Zulu distribution."
 require_contains ".github/workflows/check.yml" \
-  "java-version: '7'" \
-  "GitHub Actions workflow must run the Gradle 1.10-compatible Java 7 gate."
-require_absent ".github/workflows/check.yml" \
-  "distribution: temurin" \
-  "Temurin must not be used for the Java 7 Gradle 1.10 gate."
-require_absent ".github/workflows/check.yml" \
   "java-version: '8'" \
-  "Gradle 1.10 must not run under Java 8."
+  "GitHub Actions workflow must run the Gradle 4.1-compatible Java 8 gate."
+require_absent ".github/workflows/check.yml" \
+  "java-version: '7'" \
+  "GitHub Actions workflow must not retain the Java 7 TLS-failing gate."
 require_absent ".github/workflows/check.yml" \
   "branches:" \
   "GitHub Actions push checks must cover feature branches."
@@ -1017,7 +1086,7 @@ require_contains ".github/workflows/check.yml" \
   "platforms;android-19" \
   "GitHub Actions workflow must provision the pinned Android platform."
 require_contains ".github/workflows/check.yml" \
-  "build-tools;24.0.3" \
+  "build-tools;26.0.2" \
   "GitHub Actions workflow must provision the pinned Android build tools."
 require_contains ".github/workflows/check.yml" \
   'ANDROID_SDK_ROOT=$ANDROID_HOME' \
@@ -1119,7 +1188,7 @@ require_contains "README.md" "./gradlew check --no-daemon" \
   "README must document Gradle check verification."
 require_contains "README.md" "./gradlew assembleDebug --no-daemon" \
   "README must document Gradle build verification."
-require_contains "README.md" "Android build-tools 24.0.3" \
+require_contains "README.md" "Android build-tools 26.0.2" \
   "README must document the pinned Android build-tools version."
 require_contains "README.md" "Constants.java.example" \
   "README must document the Parse credential template."

@@ -83,11 +83,10 @@ starting the application because startup rejects unchanged placeholders.
 - `scripts/test-constants-generation.sh` - verifies placeholder creation and
   proves existing local credentials are not overwritten
 - `scripts/test-gradle-toolchain.sh` - verifies the hosted workflow pairs the
-  Gradle 1.10 wrapper and Android Gradle Plugin 0.8.3 with Java 7
+  Gradle 4.1 wrapper and Android Gradle Plugin 3.0.1 with Java 8
 - `scripts/test-gradle-dependency-resolution.sh` - verifies the Gradle source
-  uses the canonical HTTPS Maven Central endpoint instead of the hosted
-  Java 7 peer-auth-failing `repo1.maven.org` endpoint or ambiguous
-  `mavenCentral()` shorthand
+  resolves Android artifacts from Google Maven before Maven Central, without
+  JCenter, insecure HTTP, or hosted Java 7 peer-auth-failing endpoints
 - `scripts/test-gradle-wrapper-authentication.sh` - mutates `gradlew`, the
   wrapper jar, and wrapper properties to verify wrapper authentication rejects
   replacements and restorations before Gradle execution
@@ -104,10 +103,10 @@ starting the application because startup rejects unchanged placeholders.
   for pull-request-authored repository code. Caller-supplied Make invocations or
   local filesystem changes that replace wrapper files after the inline hosted
   authentication step are outside that first-command boundary. After
-  authentication, GitHub Actions sets up Zulu Java 7, provisions Android API 19
-  and build-tools 24.0.3, resolves Gradle dependencies from
-  `https://repo.maven.apache.org/maven2`, then runs the same root `make check`
-  gate through
+  authentication, GitHub Actions sets up Zulu Java 8, provisions Android API 19
+  and build-tools 26.0.2, resolves Android Gradle Plugin 3.0.1 and appcompat
+  19.1.0 from Google Maven before Maven Central, then runs the same root
+  `make check` gate through
   `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
   pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
   superseded-run cancellation, and a 15-minute timeout.
@@ -122,13 +121,20 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
 ## Configuration and Secrets
 
 - Detected references to Parse. Keep API keys, OAuth credentials, tokens, and account-specific values in local configuration only.
-- Traveller is pinned to Android build-tools 24.0.3 for this legacy baseline.
+- Traveller is pinned to Android build-tools 26.0.2 for this legacy baseline.
 - Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
   `Constants.java.example` only when the local file is missing. Replace the
   placeholder Parse values locally; `Constants.java` must stay ignored.
 - Changes to the reviewed Gradle wrapper digests are security-sensitive because
   hosted validation rejects unreviewed initial checkout replacements before any
   repository-owned script, SDK setup, Java setup, or Make command runs.
+- The Gradle wrapper launcher comes from Gradle's official `v4.1.0` source
+  commit `941559e020f6c357ebb08d5c67acdb858a3defc2`; the generated wrapper jar
+  comes from the immutable Gradle-org sample URL documented in the repair
+  evidence and hashes to
+  `f4d953f31fbf6c38a8c330d19171c8ba6e0d1ff59d4d5c5c2d3ed821c9f3d5a3`. The
+  wrapper properties use the official Gradle 4.1 all distribution URL with
+  `distributionSha256Sum=5c07b3bac2209fbc98fb1fdf6fd831f72429cdf8c503807404eae03d8c8099e5`.
 - Traveller fails before `Parse.initialize` when either local Parse value is
   blank or still matches the checked-in template placeholder. The diagnostic
   never includes configured credential values.

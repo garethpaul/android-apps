@@ -38,11 +38,11 @@ verify_digest() {
   fi
 }
 
-verify_digest "874d75d37bf38c810a8314e0b2f78a3c77fce9437963ae33cec8543d92662b61" \
+verify_digest "cf139290d3b7334cc99b58ecb6adc549c59ecb8f1f4162b122ad4590ead7585e" \
   "traveller-android-app/gradlew"
-verify_digest "e2b82129ab64751fd40437007bd2f7f2afb3c6e41a9198e628650b22d5824a14" \
+verify_digest "f4d953f31fbf6c38a8c330d19171c8ba6e0d1ff59d4d5c5c2d3ed821c9f3d5a3" \
   "traveller-android-app/gradle/wrapper/gradle-wrapper.jar"
-verify_digest "3938dfe4bc3a01a40bd2da0c099bbc863381ec24e5cf5e3f4adb556fe2bf4621" \
+verify_digest "45971c7481b5fb9a3bc7345986390cf518d1d47803af4a0007e9201e4167c38c" \
   "traveller-android-app/gradle/wrapper/gradle-wrapper.properties"
 
 printf '%s\n' "Traveller Gradle wrapper authentication checks passed."

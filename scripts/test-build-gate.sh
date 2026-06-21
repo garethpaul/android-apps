@@ -92,7 +92,7 @@ if (
   exit 1
 fi
 
-for sdk_package in 'platforms;android-19' 'build-tools;24.0.3'; do
+for sdk_package in 'platforms;android-19' 'build-tools;26.0.2'; do
   if ! grep -Fq "$sdk_package" "$WORKFLOW_FILE"; then
     printf '%s\n' "Hosted build gate must provision $sdk_package." >&2
     exit 1

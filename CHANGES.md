@@ -6,10 +6,10 @@
   instead of reporting a successful skip.
 - Allowed SDK-configured clean builds to reach Gradle so `preBuild` can generate
   the ignored local `Constants.java` before lint and debug assembly.
-- Added behavioral build-gate and constants-generation regressions and
+- Added behavioral build-gate and constants-generation regressions and initially
   provisioned Android API 19 plus build-tools 24.0.3 in hosted verification.
-- Pinned hosted verification to Zulu Java 7 so the Gradle 1.10 wrapper is not
-  run under Java 8.
+- Initially pinned hosted verification to Zulu Java 7 so the Gradle 1.10
+  wrapper was not run under Java 8.
 - Added a first post-checkout hosted Gradle wrapper digest check and local
   mutation coverage for launcher, wrapper jar, and wrapper properties changes.
 - Corrected the build-gate regression to model hosted `JAVA_HOME` selection and
@@ -18,6 +18,12 @@
   HTTPS endpoint after hosted Java 7 Gradle 1.10 failed peer authentication
   against `repo1.maven.org`, with a contract rejecting `repo1` and ambiguous
   `mavenCentral()` resolution.
+- Migrated the hosted Traveller build to Zulu Java 8, Gradle 4.1, Android
+  Gradle Plugin 3.0.1, Google Maven before Maven Central, and build-tools
+  26.0.2 after Java 7 could not authenticate modern HTTPS dependency fetches.
+- Updated the authenticated Gradle wrapper launcher, generated wrapper jar, and
+  properties digests using bounded Gradle 4.1 provenance, including the official
+  all.zip distribution checksum.
 
 ## 2026-06-17
 
