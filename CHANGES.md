@@ -12,6 +12,8 @@
   run under Java 8.
 - Added a first post-checkout hosted Gradle wrapper digest check and local
   mutation coverage for launcher, wrapper jar, and wrapper properties changes.
+- Corrected the build-gate regression to model hosted `JAVA_HOME` selection and
+  clarified that wrapper authentication covers initial checkout bytes.
 
 ## 2026-06-17
 

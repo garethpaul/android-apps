@@ -47,10 +47,11 @@
 - Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
   `Constants.java.example` only when the local file is missing. Replace the
   placeholder Parse values locally; `Constants.java` must stay ignored.
-- Hosted CI authenticates the Gradle wrapper with an inline `/usr/bin/sha256sum`
-  step immediately after checkout. Treat digest updates as security-sensitive;
-  Make's local verifier mirrors the check but is not a security boundary for
-  pull-request-authored repository code.
+- Hosted CI authenticates the initially checked-out Gradle wrapper with an
+  inline `/usr/bin/sha256sum` step immediately after checkout. Treat digest
+  updates as security-sensitive; Make's local verifier mirrors the check but is
+  not a security boundary for pull-request-authored repository code or
+  caller-supplied post-auth wrapper replacement.
 - Traveller trims task descriptions and rejects whitespace-only entries before saving Parse `Item` records.
 - Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Traveller treats a missing task input view as an empty description so stale layouts do not crash task creation.

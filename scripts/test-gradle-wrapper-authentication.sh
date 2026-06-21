@@ -260,6 +260,28 @@ chmod +x "$TEMP_ROOT/traveller-android-app/gradlew"
 "$TEMP_ROOT/scripts/verify-gradle-wrapper.sh" >/dev/null
 validate_manifest "$TEMP_ROOT" "$WORKFLOW_MANIFEST" >/dev/null
 
+POST_AUTH_GRADLEW="$TEMP_ROOT/post-auth-gradlew"
+cp "$TEMP_ROOT/traveller-android-app/gradlew" "$POST_AUTH_GRADLEW"
+cat > "$TEMP_ROOT/traveller-android-app/gradlew" <<'EOF'
+#!/usr/bin/env sh
+printf '%s\n' "POST_AUTH_FAKE_GRADLEW_EXECUTED" >&2
+touch post-auth-fake-gradlew-executed
+exit 0
+EOF
+chmod +x "$TEMP_ROOT/traveller-android-app/gradlew"
+
+if "$TEMP_ROOT/scripts/verify-gradle-wrapper.sh" >/dev/null 2>&1; then
+  printf '%s\n' "Local verifier must reject caller-supplied post-auth Gradle wrapper replacement." >&2
+  exit 1
+fi
+if [ -f "$TEMP_ROOT/traveller-android-app/post-auth-fake-gradlew-executed" ]; then
+  printf '%s\n' "Local post-auth verifier must reject replacement before Gradle execution." >&2
+  exit 1
+fi
+mv "$POST_AUTH_GRADLEW" "$TEMP_ROOT/traveller-android-app/gradlew"
+chmod +x "$TEMP_ROOT/traveller-android-app/gradlew"
+"$TEMP_ROOT/scripts/verify-gradle-wrapper.sh" >/dev/null
+
 for wrapper_path in \
   "traveller-android-app/gradlew" \
   "traveller-android-app/gradle/wrapper/gradle-wrapper.jar" \

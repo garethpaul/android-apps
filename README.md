@@ -92,13 +92,16 @@ starting the application because startup rejects unchanged placeholders.
 - The task-description behavior test compiles only the pure normalizer and its
   test into a temporary directory; it does not require Android or Parse.
 - From `traveller-android-app/`, run `./gradlew lint --no-daemon`, `./gradlew check --no-daemon`, and `./gradlew assembleDebug --no-daemon` when the Android SDK is configured
-- GitHub Actions first authenticates the committed Gradle wrapper launcher, jar,
-  and properties with an inline `/usr/bin/sha256sum --strict --check` step after
-  checkout. That inline workflow step is the hosted authority; Make's verifier
-  only mirrors it for local checks and is not a security boundary for
-  pull-request-authored repository code. After authentication, GitHub Actions
-  sets up Zulu Java 7, provisions Android API 19 and build-tools 24.0.3, then
-  runs the same root `make check` gate through
+- GitHub Actions first authenticates the initially checked-out Gradle wrapper
+  launcher, jar, and properties with an inline
+  `/usr/bin/sha256sum --strict --check` step after checkout. That inline
+  workflow step is the hosted authority for initial wrapper bytes; Make's
+  verifier only mirrors it for local drift checks and is not a security boundary
+  for pull-request-authored repository code. Caller-supplied Make invocations or
+  local filesystem changes that replace wrapper files after the inline hosted
+  authentication step are outside that first-command boundary. After
+  authentication, GitHub Actions sets up Zulu Java 7, provisions Android API 19
+  and build-tools 24.0.3, then runs the same root `make check` gate through
   `.github/workflows/check.yml` on pushes, pull requests, and manual runs with
   pinned checkout, read-only permissions, a fixed Ubuntu 24.04 runner,
   superseded-run cancellation, and a 15-minute timeout.
@@ -118,8 +121,8 @@ offline failures, privacy-safe evidence, and explicit unexecuted rows.
   `Constants.java.example` only when the local file is missing. Replace the
   placeholder Parse values locally; `Constants.java` must stay ignored.
 - Changes to the reviewed Gradle wrapper digests are security-sensitive because
-  hosted validation rejects unreviewed replacements before any repository-owned
-  script, SDK setup, Java setup, or Make command runs.
+  hosted validation rejects unreviewed initial checkout replacements before any
+  repository-owned script, SDK setup, Java setup, or Make command runs.
 - Traveller fails before `Parse.initialize` when either local Parse value is
   blank or still matches the checked-in template placeholder. The diagnostic
   never includes configured credential values.
