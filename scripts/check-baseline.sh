@@ -157,6 +157,9 @@ require_contains "traveller-android-app/traveller/build.gradle" \
 require_contains "traveller-android-app/gradle.properties" \
   "android.enableAapt2=false" \
   "Traveller must keep the legacy AAPT path for appcompat-v7 19.1.0 resource linking."
+require_exact_line "traveller-android-app/gradle.properties" \
+  "org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8" \
+  "Traveller Gradle verification must use a bounded heap large enough for Android lint."
 require_absent "traveller-android-app/gradle.properties" \
   "android.enableAapt2=true" \
   "Traveller must not re-enable AAPT2 for appcompat-v7 19.1.0 resource linking."
@@ -1131,8 +1134,8 @@ require_absent "Makefile" \
   "Traveller Constants.java not configured; skipping Traveller Gradle build" \
   "Makefile must let Gradle generate missing Traveller constants."
 require_contains "Makefile" \
-  "./gradlew lint assembleDebug --no-daemon" \
-  "Makefile must execute Android lint and debug assembly."
+  '$(ROOT)scripts/run-traveller-gradle.sh' \
+  "Makefile must execute the fail-closed Android lint and debug assembly wrapper."
 if [ "$(grep -Fc '$(ROOT)scripts/check-baseline.sh' "$ROOT_DIR/Makefile")" -ne 2 ]; then
   printf '%s\n' "Both baseline commands must use the protected repository root." >&2
   exit 1
@@ -1169,10 +1172,19 @@ if [ "$(grep -Fc '$(ROOT)scripts/verify-gradle-wrapper.sh' "$ROOT_DIR/Makefile")
   printf '%s\n' "The Gradle wrapper verifier must run from lint and build through the protected repository root." >&2
   exit 1
 fi
-if [ "$(grep -Fc 'cd $(ROOT)traveller-android-app && ./gradlew lint assembleDebug --no-daemon' "$ROOT_DIR/Makefile")" -ne 1 ]; then
-  printf '%s\n' "SDK-backed make build must run rooted Android lint before assembly." >&2
+if [ "$(grep -Fc '$(ROOT)scripts/run-traveller-gradle.sh' "$ROOT_DIR/Makefile")" -ne 2 ]; then
+  printf '%s\n' "Make must syntax-check and run the rooted fail-closed Gradle wrapper exactly once each." >&2
   exit 1
 fi
+require_contains "scripts/run-traveller-gradle.sh" \
+  "./gradlew lint assembleDebug --no-daemon" \
+  "Traveller Gradle wrapper must run Android lint before debug assembly."
+require_contains "scripts/run-traveller-gradle.sh" \
+  "OutOfMemoryError" \
+  "Traveller Gradle wrapper must reject lint out-of-memory failures."
+require_contains "scripts/run-traveller-gradle.sh" \
+  "lint-results.html" \
+  "Traveller Gradle wrapper must require a fresh lint report."
 require_exact_line "docs/plans/2026-06-14-traveller-make-root-override-protection.md" \
   "Status: Completed" \
   "Traveller Make root override protection plan must record completed status."

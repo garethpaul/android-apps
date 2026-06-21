@@ -13,6 +13,7 @@ mkdir -p "$TEMP_ROOT/traveller-android-app/traveller/src/main/java/com/requestla
 mkdir -p "$FAKE_JDK/bin"
 cp "$ROOT_DIR/Makefile" "$TEMP_ROOT/Makefile"
 cp "$ROOT_DIR/scripts/prepare-traveller-constants.sh" "$TEMP_ROOT/scripts/"
+cp "$ROOT_DIR/scripts/run-traveller-gradle.sh" "$TEMP_ROOT/scripts/"
 cp "$ROOT_DIR/scripts/verify-gradle-wrapper.sh" "$TEMP_ROOT/scripts/"
 cp "$ROOT_DIR/traveller-android-app/gradlew" "$TEMP_ROOT/traveller-android-app/gradlew"
 cp "$ROOT_DIR/traveller-android-app/gradle/wrapper/gradle-wrapper.jar" \
@@ -44,7 +45,14 @@ case " $* " in
     ;;
 esac
 
+if [ "${TRAVELLER_FAKE_LINT_OOM:-}" = "1" ]; then
+  printf '%s\n' "java.lang.OutOfMemoryError: Java heap space" >&2
+  exit 0
+fi
+
 sh ../scripts/prepare-traveller-constants.sh >/dev/null
+mkdir -p traveller/build/reports
+printf '%s\n' '<html><body>lint complete</body></html>' > traveller/build/reports/lint-results.html
 printf '%s\n' "$*" > gradle-java-invocation.txt
 printf '%s\n' "$0" > java-home-invocation.txt
 case "$0" in
@@ -77,6 +85,17 @@ fi
 if [ ! -f "$TEMP_ROOT/traveller-android-app/java-home-invocation.txt" ]; then
   printf '%s\n' "Hosted build-gate regression must prove gradlew uses JAVA_HOME/bin/java." >&2
   printf '%s\n' "$sdk_output" >&2
+  exit 1
+fi
+
+if oom_output=$(TRAVELLER_FAKE_LINT_OOM=1 JAVA_HOME="$FAKE_JDK" ANDROID_SDK_ROOT="$TEMP_ROOT/android-sdk" make -f "$TEMP_ROOT/Makefile" build 2>&1); then
+  printf '%s\n' "Build gate must fail closed when Android lint reports an out-of-memory failure." >&2
+  printf '%s\n' "$oom_output" >&2
+  exit 1
+fi
+if ! printf '%s\n' "$oom_output" | grep -Fq "OutOfMemoryError"; then
+  printf '%s\n' "Build gate must preserve the Android lint infrastructure failure in its output." >&2
+  printf '%s\n' "$oom_output" >&2
   exit 1
 fi
 

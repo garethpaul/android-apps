@@ -46,6 +46,7 @@ make test
 make build
 scripts/check-baseline.sh
 scripts/prepare-traveller-constants.sh
+scripts/run-traveller-gradle.sh
 scripts/verify-gradle-wrapper.sh
 scripts/test-constants-generation.sh
 scripts/test-gradle-toolchain.sh
@@ -74,10 +75,15 @@ starting the application because startup rejects unchanged placeholders.
 - `make test` - verifies the fail-closed build gate, idempotent constants
   generation, and dependency-free JVM behavior for task-description normalization
 - `make build` - requires an Android SDK, then runs legacy Traveller Android
-  lint and debug APK assembly; Gradle creates missing local placeholder constants
-  through `preBuild`, and unavailable SDK tooling fails the gate
+  lint and debug APK assembly with a bounded 2 GiB Gradle heap; the gate rejects
+  lint out-of-memory output or a missing fresh lint report even if legacy Gradle
+  exits successfully, creates missing local placeholder constants through
+  `preBuild`, and fails when SDK tooling is unavailable
 - `make check` - repository-standard wrapper around `make lint`, `make test`, and `make build`
 - `scripts/check-baseline.sh` - runs SDK-free Traveller baseline checks
+- `scripts/run-traveller-gradle.sh` - captures the combined Android lint and
+  assembly run and independently requires a nonempty fresh lint report without
+  an `OutOfMemoryError`
 - `scripts/verify-gradle-wrapper.sh` - mirrors the hosted Gradle wrapper digest
   check for local drift detection before Make invokes Gradle
 - `scripts/test-constants-generation.sh` - verifies placeholder creation and

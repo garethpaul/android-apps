@@ -7,6 +7,7 @@ check: verify
 lint:
 	sh -n $(ROOT)scripts/check-baseline.sh
 	sh -n $(ROOT)scripts/prepare-traveller-constants.sh
+	sh -n $(ROOT)scripts/run-traveller-gradle.sh
 	sh -n $(ROOT)scripts/test-gradle-dependency-resolution.sh
 	sh -n $(ROOT)scripts/verify-gradle-wrapper.sh
 	$(ROOT)scripts/verify-gradle-wrapper.sh
@@ -26,7 +27,7 @@ build:
 		echo "Android SDK not configured; refusing to skip Traveller Gradle build" >&2; \
 		exit 1; \
 	else \
-		cd $(ROOT)traveller-android-app && ./gradlew lint assembleDebug --no-daemon; \
+		$(ROOT)scripts/run-traveller-gradle.sh; \
 	fi
 
 verify: lint test build
