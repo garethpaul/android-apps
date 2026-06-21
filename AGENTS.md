@@ -28,8 +28,8 @@
 ## Testing guidance
 
 - Keep `make test` executing the dependency-free build-gate, constants,
-  Gradle/JDK toolchain, and task-description behavior tests without Android or
-  Parse dependencies.
+  Gradle/JDK toolchain, Gradle wrapper authentication, and portable
+  task-description behavior tests without Android or Parse dependencies.
 - Start with the narrowest relevant test or Make target, then run `make check` before handing off if the change is not documentation-only.
 - Keep README verification notes in sync when commands, fixtures, or supported toolchains change.
 
@@ -47,6 +47,10 @@
 - Gradle `preBuild` or `scripts/prepare-traveller-constants.sh` copies
   `Constants.java.example` only when the local file is missing. Replace the
   placeholder Parse values locally; `Constants.java` must stay ignored.
+- Hosted CI authenticates the Gradle wrapper with an inline `/usr/bin/sha256sum`
+  step immediately after checkout. Treat digest updates as security-sensitive;
+  Make's local verifier mirrors the check but is not a security boundary for
+  pull-request-authored repository code.
 - Traveller trims task descriptions and rejects whitespace-only entries before saving Parse `Item` records.
 - Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Traveller treats a missing task input view as an empty description so stale layouts do not crash task creation.

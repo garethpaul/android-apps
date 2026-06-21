@@ -216,6 +216,10 @@ if [ ! -x "$ROOT_DIR/scripts/prepare-traveller-constants.sh" ]; then
   printf '%s\n' "Traveller constants preparation helper is missing or not executable." >&2
   exit 1
 fi
+if [ ! -x "$ROOT_DIR/scripts/verify-gradle-wrapper.sh" ]; then
+  printf '%s\n' "Traveller Gradle wrapper verifier is missing or not executable." >&2
+  exit 1
+fi
 if [ ! -x "$ROOT_DIR/scripts/test-build-gate.sh" ]; then
   printf '%s\n' "Traveller build-gate regression is missing or not executable." >&2
   exit 1
@@ -226,6 +230,10 @@ if [ ! -x "$ROOT_DIR/scripts/test-constants-generation.sh" ]; then
 fi
 if [ ! -x "$ROOT_DIR/scripts/test-gradle-toolchain.sh" ]; then
   printf '%s\n' "Traveller Gradle toolchain test is missing or not executable." >&2
+  exit 1
+fi
+if [ ! -x "$ROOT_DIR/scripts/test-gradle-wrapper-authentication.sh" ]; then
+  printf '%s\n' "Traveller Gradle wrapper authentication test is missing or not executable." >&2
   exit 1
 fi
 
@@ -911,6 +919,9 @@ require_contains "Makefile" \
 require_contains "Makefile" \
   '$(ROOT)scripts/test-gradle-toolchain.sh' \
   "Makefile test must run the Gradle/JDK workflow contract."
+require_contains "Makefile" \
+  '$(ROOT)scripts/test-gradle-wrapper-authentication.sh' \
+  "Makefile test must run the Gradle wrapper authentication mutation contract."
 for required_path in \
   "docs/plans/2026-06-16-traveller-task-description-jvm-test.md" \
   "docs/plans/2026-06-17-traveller-unicode-task-whitespace.md" \
@@ -946,6 +957,22 @@ require_contains ".github/workflows/check.yml" \
 require_contains ".github/workflows/check.yml" \
   "actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00" \
   "GitHub Actions workflow must pin Java setup to an immutable revision."
+require_contains ".github/workflows/check.yml" \
+  "name: Authenticate Gradle wrapper" \
+  "GitHub Actions workflow must authenticate the Gradle wrapper immediately after checkout."
+require_contains ".github/workflows/check.yml" \
+  "test -x /usr/bin/sha256sum" \
+  "GitHub Actions workflow must require the Ubuntu system sha256sum command."
+require_contains ".github/workflows/check.yml" \
+  "/usr/bin/sha256sum --strict --check <<'GRADLE_WRAPPER_SHA256'" \
+  "GitHub Actions workflow must use strict absolute sha256sum wrapper authentication."
+for wrapper_digest in \
+  "874d75d37bf38c810a8314e0b2f78a3c77fce9437963ae33cec8543d92662b61  traveller-android-app/gradlew" \
+  "e2b82129ab64751fd40437007bd2f7f2afb3c6e41a9198e628650b22d5824a14  traveller-android-app/gradle/wrapper/gradle-wrapper.jar" \
+  "3938dfe4bc3a01a40bd2da0c099bbc863381ec24e5cf5e3f4adb556fe2bf4621  traveller-android-app/gradle/wrapper/gradle-wrapper.properties"; do
+  require_contains ".github/workflows/check.yml" "$wrapper_digest" \
+    "GitHub Actions workflow must inline reviewed wrapper digest: $wrapper_digest"
+done
 require_contains ".github/workflows/check.yml" \
   "distribution: zulu" \
   "GitHub Actions workflow must select a Java 7-capable JDK distribution."
@@ -1023,8 +1050,16 @@ if [ "$(grep -Fc '$(ROOT)scripts/test-gradle-toolchain.sh' "$ROOT_DIR/Makefile")
   printf '%s\n' "The Gradle toolchain test must use the protected repository root." >&2
   exit 1
 fi
+if [ "$(grep -Fc '$(ROOT)scripts/test-gradle-wrapper-authentication.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
+  printf '%s\n' "The Gradle wrapper authentication test must use the protected repository root." >&2
+  exit 1
+fi
 if [ "$(grep -Fc '$(ROOT)scripts/prepare-traveller-constants.sh' "$ROOT_DIR/Makefile")" -ne 1 ]; then
   printf '%s\n' "The constants helper syntax check must use the protected repository root." >&2
+  exit 1
+fi
+if [ "$(grep -Fc '$(ROOT)scripts/verify-gradle-wrapper.sh' "$ROOT_DIR/Makefile")" -ne 3 ]; then
+  printf '%s\n' "The Gradle wrapper verifier must run from lint and build through the protected repository root." >&2
   exit 1
 fi
 if [ "$(grep -Fc 'cd $(ROOT)traveller-android-app && ./gradlew lint assembleDebug --no-daemon' "$ROOT_DIR/Makefile")" -ne 1 ]; then

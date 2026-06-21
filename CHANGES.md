@@ -10,6 +10,8 @@
   provisioned Android API 19 plus build-tools 24.0.3 in hosted verification.
 - Pinned hosted verification to Zulu Java 7 so the Gradle 1.10 wrapper is not
   run under Java 8.
+- Added a first post-checkout hosted Gradle wrapper digest check and local
+  mutation coverage for launcher, wrapper jar, and wrapper properties changes.
 
 ## 2026-06-17
 

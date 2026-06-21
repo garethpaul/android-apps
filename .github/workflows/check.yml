@@ -22,6 +22,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Authenticate Gradle wrapper
+        shell: bash
+        run: |
+          test -x /usr/bin/sha256sum
+          cd "$GITHUB_WORKSPACE"
+          /usr/bin/sha256sum --strict --check <<'GRADLE_WRAPPER_SHA256'
+          874d75d37bf38c810a8314e0b2f78a3c77fce9437963ae33cec8543d92662b61  traveller-android-app/gradlew
+          e2b82129ab64751fd40437007bd2f7f2afb3c6e41a9198e628650b22d5824a14  traveller-android-app/gradle/wrapper/gradle-wrapper.jar
+          3938dfe4bc3a01a40bd2da0c099bbc863381ec24e5cf5e3f4adb556fe2bf4621  traveller-android-app/gradle/wrapper/gradle-wrapper.properties
+          GRADLE_WRAPPER_SHA256
+
       - name: Provision legacy Android SDK
         shell: bash
         run: |
