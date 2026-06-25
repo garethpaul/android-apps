@@ -1060,7 +1060,7 @@ fi
 for runner_contract in \
   'mktemp -d' \
   'trap '\''rm -rf "$BUILD_DIR"'\'' EXIT HUP INT TERM' \
-  '"$JAVAC" -source 7 -target 7 -d "$BUILD_DIR"' \
+  '"$JAVAC" -source 7 -target 7 -encoding UTF-8 -d "$BUILD_DIR"' \
   '"$JAVA" -cp "$BUILD_DIR" com.requestlabs.traveller.TaskDescriptionNormalizerTest'; do
   require_contains "scripts/test-task-description-normalizer.sh" "$runner_contract" \
     "Task-description JVM runner must keep contract: $runner_contract"

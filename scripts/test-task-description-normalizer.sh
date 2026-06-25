@@ -17,7 +17,7 @@ fi
 BUILD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/traveller-task-description.XXXXXX")
 trap 'rm -rf "$BUILD_DIR"' EXIT HUP INT TERM
 
-"$JAVAC" -source 7 -target 7 -d "$BUILD_DIR" \
+"$JAVAC" -source 7 -target 7 -encoding UTF-8 -d "$BUILD_DIR" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/TaskDescriptionNormalizer.java" \
   "$ROOT_DIR/traveller-android-app/traveller/src/test/java/com/requestlabs/traveller/TaskDescriptionNormalizerTest.java"
 "$JAVA" -cp "$BUILD_DIR" com.requestlabs.traveller.TaskDescriptionNormalizerTest
