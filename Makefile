@@ -1,25 +1,33 @@
 .PHONY: build check lint test verify
 
-ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-TRAVELLER_CONSTANTS := $(ROOT)traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/Constants.java
+override ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 check: verify
 
 lint:
 	sh -n $(ROOT)scripts/check-baseline.sh
 	sh -n $(ROOT)scripts/prepare-traveller-constants.sh
+	sh -n $(ROOT)scripts/run-traveller-gradle.sh
+	sh -n $(ROOT)scripts/test-gradle-dependency-resolution.sh
+	sh -n $(ROOT)scripts/verify-gradle-wrapper.sh
+	$(ROOT)scripts/verify-gradle-wrapper.sh
 	$(ROOT)scripts/check-baseline.sh
 
 test:
-	$(ROOT)scripts/check-baseline.sh
+	$(ROOT)scripts/test-build-gate.sh
+	$(ROOT)scripts/test-constants-generation.sh
+	$(ROOT)scripts/test-gradle-dependency-resolution.sh
+	$(ROOT)scripts/test-gradle-toolchain.sh
+	$(ROOT)scripts/test-gradle-wrapper-authentication.sh
+	$(ROOT)scripts/test-task-description-normalizer.sh
 
 build:
+	$(ROOT)scripts/verify-gradle-wrapper.sh
 	@if [ -z "$${ANDROID_HOME}$${ANDROID_SDK_ROOT}" ]; then \
-		echo "Android SDK not configured; skipping Traveller Gradle build"; \
-	elif [ ! -f "$(TRAVELLER_CONSTANTS)" ]; then \
-		echo "Traveller Constants.java not configured; skipping Traveller Gradle build"; \
+		echo "Android SDK not configured; refusing to skip Traveller Gradle build" >&2; \
+		exit 1; \
 	else \
-		cd $(ROOT)traveller-android-app && ./gradlew assembleDebug --no-daemon; \
+		$(ROOT)scripts/run-traveller-gradle.sh; \
 	fi
 
 verify: lint test build

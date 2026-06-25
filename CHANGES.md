@@ -1,5 +1,101 @@
 # Changes
 
+## 2026-06-25
+
+- Deferred Traveller backend reconciliation until every pending optimistic save
+  settles, so successful creates replace invalidated startup queries without an
+  earlier failure refresh hiding another in-flight row.
+- Added SDK-free regression contracts for both save callbacks and the shared
+  all-saves-settled refresh guard.
+
+## 2026-06-21
+
+- Made the repository build gate fail closed when Android SDK tooling is absent
+  instead of reporting a successful skip.
+- Allowed SDK-configured clean builds to reach Gradle so `preBuild` can generate
+  the ignored local `Constants.java` before lint and debug assembly.
+- Added behavioral build-gate and constants-generation regressions and initially
+  provisioned Android API 19 plus build-tools 24.0.3 in hosted verification.
+- Initially pinned hosted verification to Zulu Java 7 so the Gradle 1.10
+  wrapper was not run under Java 8.
+- Added a first post-checkout hosted Gradle wrapper digest check and local
+  mutation coverage for launcher, wrapper jar, and wrapper properties changes.
+- Corrected the build-gate regression to model hosted `JAVA_HOME` selection and
+  clarified that wrapper authentication covers initial checkout bytes.
+- Switched Traveller Gradle dependency resolution to Maven Central's canonical
+  HTTPS endpoint after hosted Java 7 Gradle 1.10 failed peer authentication
+  against `repo1.maven.org`, with a contract rejecting `repo1` and ambiguous
+  `mavenCentral()` resolution.
+- Migrated the hosted Traveller build to Zulu Java 8, Gradle 4.1, Android
+  Gradle Plugin 3.0.1, Google Maven before Maven Central, and build-tools
+  26.0.2 after Java 7 could not authenticate modern HTTPS dependency fetches.
+- Updated the authenticated Gradle wrapper launcher, generated wrapper jar, and
+  properties digests using bounded Gradle 4.1 provenance, including the official
+  all.zip distribution checksum.
+- Kept Traveller on compile/target SDK 19 and disabled AGP 3.0.1 AAPT2 so
+  appcompat-v7 19.1.0 can link its legacy framework-styleable resources without
+  changing app runtime SDK behavior.
+- Made the Android build gate reject zero-exit lint out-of-memory and generic
+  internal failures plus missing fresh lint reports, with a bounded 2 GiB
+  Gradle heap and SDK-free regressions for the hosted false-green failure mode.
+
+## 2026-06-17
+
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
+- Added executable regressions for Unicode-space-only input, Unicode boundary
+  trimming, preserved interior spacing, and legacy control-character trimming.
+
+## 2026-06-16
+
+- Extracted Traveller task-description behavior into a package-local pure Java
+  normalizer used by `MainActivity`.
+- Added a dependency-free JVM test for null, empty, whitespace-only, ASCII, and
+  Unicode descriptions, with temporary compiler output cleaned on every exit.
+- Pinned hosted Java setup, disabled persisted checkout credentials, and made
+  feature-branch pushes run the canonical `make check` gate.
+
+## 2026-06-15
+
+- Added an explicit launcher export boundary for Traveller's sole
+  `MAIN`/`LAUNCHER` activity and a structural manifest contract that rejects
+  implicit, false, duplicated, or unrelated export declarations.
+- Moved `Item` to application-owned Parse subclass registration before SDK
+  initialization, preventing activity recreation from repeating global setup.
+- Added mutation-sensitive ownership and initialization-order contracts.
+
+## 2026-06-13
+
+- Added callbacks for optimistic task save failures so unsaved new rows are
+  removed and failed completion toggles restore their prior state.
+- Added lifecycle-gated localized errors, guarded refresh reconciliation, and
+  SDK-free regression contracts for both save paths.
+- Invalidated stale Parse query callbacks before optimistic creates and toggles
+  so older query snapshots cannot overwrite the current adapter action.
+- Added mutation-sensitive generation-order contracts and guidance.
+- Rejected stale save callbacks from earlier visible lifecycles before they can
+  reconcile against a newly resumed adapter.
+- Added per-task save generations so late same-item callbacks cannot reconcile
+  over a newer optimistic save in the same visible lifecycle.
+- Corrected independent optimistic save failures so unrelated later task
+  mutations no longer suppress rollback, notification, and refresh.
+- Suppressed expected Parse cache-miss callbacks while `CACHE_THEN_NETWORK`
+  continues to the backend, preserving toasts for actual load failures.
+- Suppressed later Parse network-error toasts after a successful cached task delivery
+  while preserving visible failures when a query has not delivered usable data.
+- Added an exact-commit Android device and Parse backend verification matrix for
+  configuration, queries, optimistic saves, concurrency, lifecycle, failures,
+  and privacy-safe evidence, with every runtime row explicitly unexecuted.
+
+## 2026-06-12
+
+- Moved Traveller item refreshes into the visible activity lifecycle.
+- Added query generations so callbacks from stopped or superseded Parse
+  refreshes cannot mutate the adapter or show stale errors.
+- Extended the SDK-free baseline and documentation with lifecycle ordering
+  contracts.
+- Strengthened the SDK-backed `make build` gate to run Android lint before
+  assembling the debug APK.
+
 ## 2026-06-10
 
 - Added a fail-fast Traveller guard that rejects blank or unchanged Parse

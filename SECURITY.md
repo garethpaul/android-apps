@@ -35,6 +35,31 @@ Helpful reports include:
   settings, and editor preferences are not committed.
 - Traveller row rendering should tolerate malformed local row data and stale
   layouts without crashing before the user can recover.
+- Parse query callbacks should not mutate UI or display errors after the
+  activity stops, and superseded refresh generations should be ignored.
+- Expected Parse cache misses do not display load-failure errors while the
+  configured cache-then-network query continues to its network result.
+- A successful cached task delivery suppresses a later network-error toast from the
+  same query without hiding failures that occur before any usable result.
+- Keep application-owned Parse subclass registration before SDK initialization
+  so activity recreation cannot alter process-wide model setup.
+- Traveller's explicit launcher export boundary is limited to `MainActivity`;
+  the portable contract couples it to the `MAIN`/`LAUNCHER` intent filter and
+  rejects unrelated exported components.
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
+- Optimistic creates and toggles invalidate stale Parse query callbacks before
+  changing adapter state, preventing older server snapshots from undoing the
+  user's current visible action.
+- The app treats optimistic task save failures by restoring or removing local
+  adapter state only while the activity is visible, using generic localized
+  errors, and refreshing from Parse without exposing backend details.
+- Lifecycle generations reject stale save callbacks from earlier visible lifecycles
+  before they can mutate a newly resumed adapter.
+- Per-task save generations reject older same-item callbacks before success or
+  failure reconciliation while preserving independent task saves.
+- Independent optimistic save failures still reconcile after unrelated task
+  mutations; only older same-task callbacks are suppressed by per-task save
+  generations.
 
 ## Mobile Privacy Notes
 
@@ -44,6 +69,17 @@ If this project requests device permissions such as location, camera, microphone
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
+Hosted validation authenticates the initially checked-out Traveller Gradle
+wrapper launcher, wrapper jar, and wrapper properties with an inline
+`/usr/bin/sha256sum` step immediately after checkout. Treat digest updates as
+security-sensitive supply-chain changes; the Make verifier mirrors that check
+for local drift detection but is not the hosted security boundary for
+pull-request-authored code or caller-supplied post-auth wrapper replacement.
+The SDK-backed Make gate also captures the legacy Gradle run and rejects lint
+out-of-memory output, the generic internal lint failure marker, or a missing
+fresh lint report, rather than trusting a zero exit from Android Gradle Plugin
+3.0.1 after an internal lint failure.
+
 ## Safe Research Guidelines
 
 Good-faith research is welcome when it stays within these boundaries:
@@ -52,6 +88,8 @@ Good-faith research is welcome when it stays within these boundaries:
 - avoid destructive actions, persistence, spam, phishing, social engineering, or denial-of-service testing
 - minimize access to personal data and stop testing immediately if private data is exposed
 - do not exfiltrate secrets or third-party data; report the minimum evidence needed to verify impact
+- the portable task-description behavior test uses no credentials, network,
+  Android SDK, emulator, or Parse backend
 - keep vulnerability details confidential until the maintainer has assessed the report
 
 ## Maintainer Response

@@ -15,24 +15,31 @@ import android.widget.Toast;
 import com.parse.FindCallback;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     private EditText mTaskInput;
     private ListView mListView;
     private ItemAdapter mAdapter;
+    private boolean mStarted;
+    private int mLifecycleGeneration;
+    private int mDataGeneration;
+    private int mNextSaveGeneration;
+    private final Map<Item, Integer> mSaveGenerations =
+            new IdentityHashMap<Item, Integer>();
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ParseObject.registerSubclass(Item.class);
         setContentView(R.layout.item_activity);
         ParseAnalytics.trackAppOpened(getIntent());
 
@@ -43,7 +50,23 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mStarted = true;
+        mLifecycleGeneration++;
         updateData();
+    }
+
+    @Override
+    protected void onStop() {
+        mStarted = false;
+        mLifecycleGeneration++;
+        mDataGeneration++;
+        mSaveGenerations.clear();
+        super.onStop();
     }
 
 
@@ -53,16 +76,42 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     public void createTask(View v) {
         String description = normalizedTaskDescription();
         if (description.length() > 0){
+            mDataGeneration++;
             Item t = new Item();
             t.setDescription(description);
             t.setCompleted(false);
-            t.saveEventually();
             if(mAdapter != null){
                 mAdapter.add(t);
             }
-            mTaskInput.setText("");
+            saveNewTask(t);
+            if(mTaskInput != null){
+                mTaskInput.setText("");
+            }
         }
 
+    }
+
+    private void saveNewTask(final Item task){
+        final int lifecycleGeneration = mLifecycleGeneration;
+        final int saveGeneration = beginTaskSave(task);
+        task.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException error) {
+                if(!finishCurrentTaskSave(task, saveGeneration)){
+                    return;
+                }
+                if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
+                    return;
+                }
+
+                if(error != null){
+                    mAdapter.remove(task);
+                    mAdapter.notifyDataSetChanged();
+                    showSaveFailure();
+                }
+                refreshAfterSaveCompletion();
+            }
+        });
     }
 
     //
@@ -70,27 +119,35 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
     private String normalizedTaskDescription() {
         if(mTaskInput == null || mTaskInput.getText() == null){
-            return "";
+            return TaskDescriptionNormalizer.normalize(null);
         }
-        return mTaskInput.getText().toString().trim();
+        return TaskDescriptionNormalizer.normalize(mTaskInput.getText().toString());
     }
 
 
 
 
     public void updateData(){
+        final int dataGeneration = ++mDataGeneration;
         ParseQuery<Item> query = ParseQuery.getQuery(Item.class);
         query.whereNotEqualTo("completed", true);
 
         query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
         query.findInBackground(new FindCallback<Item>() {
+            private boolean deliveredTasks;
 
             @Override
             public void done(List<Item> tasks, ParseException error) {
+                if(!mStarted || dataGeneration != mDataGeneration || mAdapter == null){
+                    return;
+                }
+
                 if(error == null && tasks != null){
                     mAdapter.clear();
                     mAdapter.addAll(tasks);
-                }else{
+                    deliveredTasks = true;
+                }else if(!deliveredTasks &&
+                        (error == null || error.getCode() != ParseException.CACHE_MISS)){
                     Toast.makeText(
                             MainActivity.this,
                             R.string.load_items_error,
@@ -150,18 +207,76 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             return;
         }
 
-        task.setCompleted(!task.isCompleted());
+        mDataGeneration++;
+        final boolean previousCompleted = task.isCompleted();
+        task.setCompleted(!previousCompleted);
 
         if(task.isCompleted()){
             taskDescription.setPaintFlags(taskDescription.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }else{
             taskDescription.setPaintFlags(taskDescription.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-        task.saveEventually();
         if(task.isCompleted()){
             mAdapter.remove(task);
         }else{
             mAdapter.notifyDataSetChanged();
         }
+        saveTaskCompletion(task, previousCompleted);
+    }
+
+    private void saveTaskCompletion(final Item task, final boolean previousCompleted){
+        final int lifecycleGeneration = mLifecycleGeneration;
+        final int saveGeneration = beginTaskSave(task);
+        task.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException error) {
+                if(!finishCurrentTaskSave(task, saveGeneration)){
+                    return;
+                }
+                if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
+                    return;
+                }
+
+                if(error != null){
+                    task.setCompleted(previousCompleted);
+                    if(previousCompleted){
+                        mAdapter.remove(task);
+                    }else if(mAdapter.getPosition(task) < 0){
+                        mAdapter.add(task);
+                    }
+                    mAdapter.notifyDataSetChanged();
+                    showSaveFailure();
+                }
+                refreshAfterSaveCompletion();
+            }
+        });
+    }
+
+    private int beginTaskSave(Item task){
+        int saveGeneration = ++mNextSaveGeneration;
+        mSaveGenerations.put(task, saveGeneration);
+        return saveGeneration;
+    }
+
+    private boolean finishCurrentTaskSave(Item task, int saveGeneration){
+        Integer currentGeneration = mSaveGenerations.get(task);
+        if(currentGeneration == null || currentGeneration != saveGeneration){
+            return false;
+        }
+        mSaveGenerations.remove(task);
+        return true;
+    }
+
+    private void refreshAfterSaveCompletion(){
+        if(mSaveGenerations.isEmpty()){
+            updateData();
+        }
+    }
+
+    private void showSaveFailure(){
+        Toast.makeText(
+                MainActivity.this,
+                R.string.save_item_error,
+                Toast.LENGTH_SHORT).show();
     }
 }

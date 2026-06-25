@@ -20,9 +20,14 @@ Priority:
 - Preserve the Traveller project structure and documented legacy toolchain
 - Keep Parse credentials out of git through `Constants.java.example`
 - Reject blank or unchanged Parse placeholders before SDK initialization
+- Keep application-owned Parse subclass registration before SDK initialization
+- Keep the explicit launcher export boundary limited to `MainActivity` and keep
+  unrelated Android components private
 - Maintain SDK-free baseline checks for quick verification
+- Execute task-description behavior on a standard JDK without Android or Parse
 - Keep lint, test, and build gate targets available from the repository root
 - Keep Traveller item creation from persisting empty-looking task records
+- Traveller removes ASCII and Unicode boundary whitespace before rejecting empty task descriptions.
 - Keep task creation safe when legacy input views are missing
 - Keep task toggle handling safe when legacy row state is missing or malformed
 - Keep task toggle handling safe when list-click positions are stale
@@ -31,11 +36,21 @@ Priority:
 - Keep local Traveller Parse state out of Android backups by default
 - Keep Parse task loading failures visible without exposing credentials or
   backend internals
+- Suppress expected cache-miss errors while cache-then-network loading proceeds
+- Keep stopped or superseded Parse query callbacks from mutating Traveller UI
+- Invalidate stale Parse query callbacks before optimistic adapter changes
+- Reject save callbacks from earlier visible lifecycles before adapter
+  reconciliation
+- Reject older same-item save callbacks before reconciling newer optimistic state
+- Keep unrelated optimistic save failures independent while preserving
+  same-task save callback ownership
 - Keep IDE workspace metadata out of the shared Traveller project baseline
 - Keep nested Android Studio metadata out of the shared Traveller project
   baseline
 - Keep GitHub Actions running the root `make check` baseline
 - Make old Gradle, Android plugin, and build-tools requirements explicit
+- Keep exact-commit Android and Parse runtime evidence separate from portable
+  contracts, with unexecuted scenarios recorded explicitly
 
 Next priorities:
 
@@ -46,6 +61,8 @@ Next priorities:
 - Add Android tests once the project runs in an SDK-capable environment
 - Separate reusable sample code from obsolete experiment scaffolding where it
   improves maintainability
+- Execute the Traveller device verification matrix against an authorized test
+  backend with privacy-safe evidence
 
 Contribution rules:
 

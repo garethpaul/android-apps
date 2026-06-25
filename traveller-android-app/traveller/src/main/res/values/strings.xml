@@ -6,5 +6,6 @@
     <string name="item_input_hint">Enter an Item</string>
     <string name="save_item">Save</string>
     <string name="load_items_error">Unable to load traveller items.</string>
+    <string name="save_item_error">Unable to save traveller item.</string>
 
 </resources>

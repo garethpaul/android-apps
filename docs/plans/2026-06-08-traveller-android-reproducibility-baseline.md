@@ -15,7 +15,7 @@ Raise the engineering baseline for the legacy Traveller Android app by making de
 
 ## Problem Frame
 
-The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Plugin 0.8.x, Parse 1.5.0, dynamic dependency versions, and almost no setup documentation. A broad Android migration is high risk without a reproducible starting point, especially because older SDK-19 build-tools ship 32-bit host binaries that do not run here and the app depends on an ignored `Constants.java` file for Parse credentials.
+The repository is a 2014-era Android project with a legacy Parse 1.5.0 app and an intentionally narrow build-system baseline. The baseline originally used Gradle 1.10 and Android Gradle Plugin 0.8.x; hosted Java 7 later failed modern HTTPS dependency authentication, so the maintained baseline now uses Java 8, Gradle 4.1, Android Gradle Plugin 3.0.1, Google Maven before Maven Central, API 19, build-tools 26.0.2, and AGP 3.0.1's legacy AAPT path while preserving app source behavior.
 
 ---
 
@@ -34,9 +34,10 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 
 ## Key Technical Decisions
 
-- **Pin only the legacy coordinates:** Use fixed versions compatible with compile SDK 19 instead of migrating the Android toolchain in the same pass.
-- **Use a host-compatible build-tools pin:** Use build-tools 24.0.3 because its 64-bit `aapt` runs on this host while compile and target SDK remain at 19.
-- **Use HTTPS without changing Gradle:** Keeping Gradle 1.10 avoids widening the change while removing avoidable wrapper and Maven transport risks.
+- **Pin only the legacy app coordinates:** Keep compile and target SDK 19, appcompat 19.1.0, and Parse 1.5.0 fixed while modernizing only the minimum build-system layer needed for hosted HTTPS.
+- **Use a host-compatible build-tools pin:** Use build-tools 26.0.2 with Android Gradle Plugin 3.0.1 while compile and target SDK remain at 19.
+- **Keep the legacy resource linker for appcompat:** Disable AGP 3.0.1 AAPT2 because appcompat-v7 19.1.0 declares the private framework `preserveIconSpacing` styleable; the compile SDK and target SDK stay at API 19 rather than broadening the app runtime boundary.
+- **Use maintained HTTPS repositories:** Resolve Android artifacts from Google Maven before Maven Central, with no JCenter or insecure HTTP fallback.
 - **Keep Parse secrets out of git:** Provide `Constants.java.example` and keep real `Constants.java` ignored.
 - **Add SDK-free checks:** A shell script can validate pinned dependency declarations and required template/docs even when `./gradlew` cannot configure without a compatible Android SDK.
 - **Document follow-up modernization separately:** Parse 1.5.0, appcompat 19.x, and Android Gradle Plugin 0.8.x are obsolete, but updating them requires an Android-capable verification pass.
@@ -45,7 +46,6 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 
 ## Scope Boundaries
 
-- This pass does not migrate to a newer Gradle wrapper or Android Gradle Plugin.
 - This pass does not replace Parse, appcompat, or the bundled Parse jar.
 - This pass does not commit real Parse application credentials.
 - This pass does not change app runtime behavior.
@@ -59,14 +59,21 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 
 - **Goal:** Make the existing Gradle build resolve fixed legacy versions.
 - **Files:** `traveller-android-app/gradlew`, `traveller-android-app/build.gradle`, `traveller-android-app/traveller/build.gradle`, `traveller-android-app/gradle/wrapper/gradle-wrapper.properties`
-- **Patterns:** Keep the existing Gradle 1.10 / Android Gradle Plugin 0.8 project shape; replace only dynamic versions, executable mode, and transport URLs.
+- **Patterns:** Keep the app source and SDK 19 behavior, but use Java 8, Gradle 4.1, Android Gradle Plugin 3.0.1, Google Maven before Maven Central, and AGP 3 DSL.
 - **Test Scenarios:**
   - `traveller-android-app/gradlew` is executable.
-  - `traveller-android-app/build.gradle` no longer contains `com.android.tools.build:gradle:0.8.+`.
-  - `traveller-android-app/build.gradle` uses an HTTPS Maven Central URL.
+  - `traveller-android-app/build.gradle` pins `com.android.tools.build:gradle:3.0.1`.
+  - `traveller-android-app/build.gradle` declares `google()` before `mavenCentral()` in both repository blocks.
+  - `traveller-android-app/build.gradle` does not use `repo1.maven.org`,
+    insecure HTTP, JCenter, or ad hoc repository URLs.
+  - `traveller-android-app/traveller/build.gradle` keeps compile SDK 19 and
+    target SDK 19.
   - `traveller-android-app/traveller/build.gradle` no longer contains `appcompat-v7:+`.
-  - `traveller-android-app/traveller/build.gradle` pins build-tools 24.0.3.
-  - `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` uses an HTTPS distribution URL.
+  - `traveller-android-app/traveller/build.gradle` pins build-tools 26.0.2.
+  - `traveller-android-app/traveller/build.gradle` uses `com.android.application`, `minifyEnabled`, and `implementation`.
+  - `traveller-android-app/gradle.properties` disables AAPT2 for the legacy
+    appcompat resource-linking boundary.
+  - `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` uses the Gradle 4.1 all.zip HTTPS distribution URL and checksum.
 - **Verification:** `scripts/check-baseline.sh`, `cd traveller-android-app && ./gradlew tasks --no-daemon`
 
 ### U2. Document Parse Credential Setup
@@ -101,7 +108,7 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 - **Test Scenarios:**
   - README lists `scripts/check-baseline.sh`.
   - README lists `cd traveller-android-app && ./gradlew tasks --no-daemon`.
-  - README lists Android build-tools 24.0.3.
+  - README lists Android build-tools 26.0.2.
   - README explains that Android SDK prerequisites are required before Gradle verification can pass.
   - README identifies Parse and Android toolchain modernization as future work.
 - **Verification:** Manual README review
@@ -110,7 +117,9 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 
 ## Risks & Dependencies
 
-- Android Gradle Plugin 0.8.x, Gradle 1.10, appcompat 19.x, and Parse 1.5.0 are obsolete and may require old JDK/SDK combinations.
+- Android Gradle Plugin 3.0.1, Gradle 4.1, appcompat 19.x, and Parse 1.5.0 are obsolete and may require exact hosted SDK/JDK combinations.
+- Re-enabling AAPT2, raising compile SDK, or replacing appcompat should be
+  treated as a separate modernization pass with Android runtime verification.
 - Local Android verification is expected to fail in this environment until `ANDROID_HOME` or `local.properties` points at a compatible SDK.
 - The app currently depends on a local `Constants.java` file for Parse credentials; the template improves setup clarity but intentionally does not make the app runnable without real credentials.
 
@@ -118,9 +127,9 @@ The repository is a 2014-era Android project with Gradle 1.10, Android Gradle Pl
 
 ## Sources / Research
 
-- `traveller-android-app/build.gradle` contains the dynamic Android Gradle Plugin version and previously used Gradle 1.10's HTTP `mavenCentral()` default.
+- `traveller-android-app/build.gradle` contains the Android Gradle Plugin version and previously used Gradle 1.10-era repository transport assumptions.
 - `traveller-android-app/traveller/build.gradle` contains the dynamic appcompat dependency and bundled Parse jar.
-- `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` previously used an HTTP Gradle distribution URL and now uses HTTPS.
+- `traveller-android-app/gradle/wrapper/gradle-wrapper.properties` previously used an HTTP Gradle distribution URL and now uses the verified Gradle 4.1 HTTPS all distribution plus SHA-256 checksum.
 - `traveller-android-app/gradlew` was tracked as mode `100644`, so direct execution failed with permission denied.
 - `traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/App.java` references the ignored `Constants.java` Parse credential file.
 - `.gitignore` currently ignores `Constants.java` and `Constants.class`.
