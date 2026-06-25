@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-06-25
+
+- Deferred Traveller backend reconciliation until every pending optimistic save
+  settles, so successful creates replace invalidated startup queries without an
+  earlier failure refresh hiding another in-flight row.
+- Added SDK-free regression contracts for both save callbacks and the shared
+  all-saves-settled refresh guard.
+
 ## 2026-06-21
 
 - Made the repository build gate fail closed when Android SDK tooling is absent

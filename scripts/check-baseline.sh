@@ -569,8 +569,8 @@ if ! awk '
 fi
 refresh_call_count=$(grep -Fc "updateData();" \
   "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
-if [ "$refresh_call_count" -ne 3 ]; then
-  printf '%s\n' "Traveller must keep one lifecycle refresh and two save-failure refreshes." >&2
+if [ "$refresh_call_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must keep one lifecycle refresh and one settled-save refresh path." >&2
   exit 1
 fi
 if ! awk '
@@ -610,14 +610,15 @@ fi
 for save_contract in \
   "saveNewTask(final Item task)" \
   "saveTaskCompletion(final Item task, final boolean previousCompleted)" \
-  "if(error == null)" \
+  "if(error != null)" \
   "if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null)" \
   "mAdapter.remove(task);" \
   "task.setCompleted(previousCompleted);" \
   "mAdapter.getPosition(task) < 0" \
   "mAdapter.notifyDataSetChanged();" \
   "showSaveFailure();" \
-  "updateData();"; do
+  "refreshAfterSaveCompletion();" \
+  "if(mSaveGenerations.isEmpty())"; do
   require_contains "traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java" \
     "$save_contract" \
     "Traveller save failure reconciliation must keep contract: $save_contract"
@@ -681,32 +682,32 @@ fi
 if ! awk '
   /private void saveNewTask\(final Item task\)/ { in_create = 1 }
   /private String normalizedTaskDescription\(\)/ { in_create = 0 }
-  in_create && /if\(error == null\)/ { create_error = NR }
   in_create && /lifecycleGeneration != mLifecycleGeneration/ { create_lifecycle = NR }
+  in_create && /if\(error != null\)/ { create_error = NR }
   in_create && /mAdapter\.remove\(task\);/ { create_remove = NR }
   in_create && /mAdapter\.notifyDataSetChanged\(\);/ { create_notify = NR }
   in_create && /showSaveFailure\(\);/ { create_toast = NR }
-  in_create && /updateData\(\);/ { create_refresh = NR }
+  in_create && /refreshAfterSaveCompletion\(\);/ { create_refresh = NR }
 
   /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
-  /private void showSaveFailure\(\)/ { in_toggle = 0 }
-  in_toggle && /if\(error == null\)/ { toggle_error = NR }
+  /private int beginTaskSave\(Item task\)/ { in_toggle = 0 }
   in_toggle && /lifecycleGeneration != mLifecycleGeneration/ { toggle_lifecycle = NR }
+  in_toggle && /if\(error != null\)/ { toggle_error = NR }
   in_toggle && /task\.setCompleted\(previousCompleted\);/ { toggle_restore = NR }
   in_toggle && /if\(previousCompleted\)/ { toggle_branch = NR }
   in_toggle && /mAdapter\.remove\(task\);/ { toggle_remove = NR }
   in_toggle && /mAdapter\.getPosition\(task\) < 0/ { toggle_position = NR }
   in_toggle && /mAdapter\.notifyDataSetChanged\(\);/ { toggle_notify = NR }
   in_toggle && /showSaveFailure\(\);/ { toggle_toast = NR }
-  in_toggle && /updateData\(\);/ { toggle_refresh = NR }
+  in_toggle && /refreshAfterSaveCompletion\(\);/ { toggle_refresh = NR }
   END {
     create_ok = create_error && create_lifecycle && create_remove && create_notify &&
-      create_toast && create_refresh && create_error < create_lifecycle &&
-      create_lifecycle < create_remove && create_remove < create_notify &&
+      create_toast && create_refresh && create_lifecycle < create_error &&
+      create_error < create_remove && create_remove < create_notify &&
       create_notify < create_toast && create_toast < create_refresh
     toggle_ok = toggle_error && toggle_restore && toggle_lifecycle && toggle_branch && toggle_remove &&
       toggle_position && toggle_notify && toggle_toast && toggle_refresh &&
-      toggle_error < toggle_lifecycle && toggle_lifecycle < toggle_restore &&
+      toggle_lifecycle < toggle_error && toggle_error < toggle_restore &&
       toggle_restore < toggle_branch && toggle_branch < toggle_remove &&
       toggle_remove < toggle_position &&
       toggle_position < toggle_notify && toggle_notify < toggle_toast &&
@@ -715,6 +716,22 @@ if ! awk '
   }
 ' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
   printf '%s\n' "Traveller save callbacks must guard, roll back, notify, report, and refresh in order." >&2
+  exit 1
+fi
+save_refresh_count=$(grep -Fc "refreshAfterSaveCompletion();" \
+  "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java")
+if [ "$save_refresh_count" -ne 2 ]; then
+  printf '%s\n' "Traveller must reconcile after both creation and toggle saves settle." >&2
+  exit 1
+fi
+if ! awk '
+  /private void refreshAfterSaveCompletion\(\)/ { in_refresh = 1 }
+  /private void showSaveFailure\(\)/ { in_refresh = 0 }
+  in_refresh && /if\(mSaveGenerations\.isEmpty\(\)\)/ { empty_guard = NR }
+  in_refresh && /updateData\(\);/ { refresh = NR }
+  END { exit !(empty_guard && refresh && empty_guard < refresh) }
+' "$ROOT_DIR/traveller-android-app/traveller/src/main/java/com/requestlabs/traveller/MainActivity.java"; then
+  printf '%s\n' "Traveller must wait for all optimistic saves before refreshing backend state." >&2
   exit 1
 fi
 for lifecycle_doc_contract in \
@@ -760,12 +777,12 @@ if ! awk '
   /private void saveNewTask\(final Item task\)/ { in_create = 1 }
   /private String normalizedTaskDescription\(\)/ { in_create = 0 }
   in_create && /finishCurrentTaskSave\(task, saveGeneration\)/ { create_generation = NR }
-  in_create && /if\(error == null\)/ { create_error = NR }
+  in_create && /if\(error != null\)/ { create_error = NR }
 
   /private void saveTaskCompletion\(final Item task, final boolean previousCompleted\)/ { in_toggle = 1 }
   /private int beginTaskSave\(Item task\)/ { in_toggle = 0 }
   in_toggle && /finishCurrentTaskSave\(task, saveGeneration\)/ { toggle_generation = NR }
-  in_toggle && /if\(error == null\)/ { toggle_error = NR }
+  in_toggle && /if\(error != null\)/ { toggle_error = NR }
   END {
     exit !(create_generation && create_error && create_generation < create_error &&
       toggle_generation && toggle_error && toggle_generation < toggle_error)

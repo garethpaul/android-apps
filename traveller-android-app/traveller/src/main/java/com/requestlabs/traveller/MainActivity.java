@@ -100,17 +100,16 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 if(!finishCurrentTaskSave(task, saveGeneration)){
                     return;
                 }
-                if(error == null){
-                    return;
-                }
                 if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
                     return;
                 }
 
-                mAdapter.remove(task);
-                mAdapter.notifyDataSetChanged();
-                showSaveFailure();
-                updateData();
+                if(error != null){
+                    mAdapter.remove(task);
+                    mAdapter.notifyDataSetChanged();
+                    showSaveFailure();
+                }
+                refreshAfterSaveCompletion();
             }
         });
     }
@@ -234,23 +233,21 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 if(!finishCurrentTaskSave(task, saveGeneration)){
                     return;
                 }
-                if(error == null){
-                    return;
-                }
-
                 if(!mStarted || lifecycleGeneration != mLifecycleGeneration || mAdapter == null){
                     return;
                 }
 
-                task.setCompleted(previousCompleted);
-                if(previousCompleted){
-                    mAdapter.remove(task);
-                }else if(mAdapter.getPosition(task) < 0){
-                    mAdapter.add(task);
+                if(error != null){
+                    task.setCompleted(previousCompleted);
+                    if(previousCompleted){
+                        mAdapter.remove(task);
+                    }else if(mAdapter.getPosition(task) < 0){
+                        mAdapter.add(task);
+                    }
+                    mAdapter.notifyDataSetChanged();
+                    showSaveFailure();
                 }
-                mAdapter.notifyDataSetChanged();
-                showSaveFailure();
-                updateData();
+                refreshAfterSaveCompletion();
             }
         });
     }
@@ -268,6 +265,12 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
         mSaveGenerations.remove(task);
         return true;
+    }
+
+    private void refreshAfterSaveCompletion(){
+        if(mSaveGenerations.isEmpty()){
+            updateData();
+        }
     }
 
     private void showSaveFailure(){
