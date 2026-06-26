@@ -2,6 +2,8 @@
 
 ## 2026-06-25
 
+- Made the dependency-free task-description JVM test compile its Unicode
+  fixtures explicitly as UTF-8 instead of inheriting the host locale.
 - Deferred Traveller backend reconciliation until every pending optimistic save
   settles, so successful creates replace invalidated startup queries without an
   earlier failure refresh hiding another in-flight row.
