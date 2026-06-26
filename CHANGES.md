@@ -2,6 +2,10 @@
 
 ## 2026-06-25
 
+- Reconciled issue #1 with the constants generation shipped in aggregate PR #4:
+  Gradle `preBuild` creates the ignored placeholder from
+  `Constants.java.example`, preserves local credentials, and is covered by the
+  dependency-free generation and clean-build gate regressions.
 - Made the dependency-free task-description JVM test compile its Unicode
   fixtures explicitly as UTF-8 instead of inheriting the host locale.
 - Deferred Traveller backend reconciliation until every pending optimistic save
