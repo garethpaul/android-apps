@@ -1065,6 +1065,38 @@ for runner_contract in \
   require_contains "scripts/test-task-description-normalizer.sh" "$runner_contract" \
     "Task-description JVM runner must keep contract: $runner_contract"
 done
+for build_gate_runner_contract in \
+  'cp "$ROOT_DIR/scripts/run-traveller-gradle.sh" "$TEMP_ROOT/scripts/"' \
+  'make -f "$TEMP_ROOT/Makefile" build' \
+  'Traveller build gate clean-checkout checks passed.'; do
+  require_contains "scripts/test-build-gate.sh" "$build_gate_runner_contract" \
+    "Build-gate regression runner must keep contract: $build_gate_runner_contract"
+done
+for constants_runner_contract in \
+  'sh "$TEMP_ROOT/scripts/prepare-traveller-constants.sh" >/dev/null' \
+  'Traveller constants generation checks passed.'; do
+  require_contains "scripts/test-constants-generation.sh" "$constants_runner_contract" \
+    "Constants generation runner must keep contract: $constants_runner_contract"
+done
+for dependency_runner_contract in \
+  'if [ "$google_count" -ne 2 ] || [ "$maven_count" -ne 2 ]; then' \
+  'Traveller Gradle dependency-resolution checks passed.'; do
+  require_contains "scripts/test-gradle-dependency-resolution.sh" "$dependency_runner_contract" \
+    "Gradle dependency-resolution runner must keep contract: $dependency_runner_contract"
+done
+for toolchain_runner_contract in \
+  'if [ "$platform_packages" != "platforms;android-19" ]; then' \
+  'Traveller Gradle toolchain workflow checks passed.'; do
+  require_contains "scripts/test-gradle-toolchain.sh" "$toolchain_runner_contract" \
+    "Gradle toolchain runner must keep contract: $toolchain_runner_contract"
+done
+for wrapper_mutation_runner_contract in \
+  'cp "$ROOT_DIR/scripts/verify-gradle-wrapper.sh" "$TEMP_ROOT/scripts/verify-gradle-wrapper.sh"' \
+  '"$TEMP_ROOT/scripts/verify-gradle-wrapper.sh" >/dev/null' \
+  'Traveller Gradle wrapper authentication mutation checks passed.'; do
+  require_contains "scripts/test-gradle-wrapper-authentication.sh" "$wrapper_mutation_runner_contract" \
+    "Gradle wrapper authentication mutation runner must keep contract: $wrapper_mutation_runner_contract"
+done
 require_contains "docs/plans/2026-06-08-traveller-constants-helper.md" \
   "make check" \
   "Traveller constants helper plan must record make check verification."
